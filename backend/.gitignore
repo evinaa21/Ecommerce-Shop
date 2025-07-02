@@ -1,0 +1,10 @@
+# Composer dependencies
+/vendor
+
+# Environment configuration file
+.env
+
+# IDE and OS files
+.idea/
+.vscode/
+*.DS_Store
