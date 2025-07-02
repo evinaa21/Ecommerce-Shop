@@ -1,0 +1,76 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 100px;
+  height: 80px;
+  background-color: #ffffff;
+  color: #1d1f22;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-nav {
+  display: flex;
+  gap: 32px;
+  height: 100%;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #1d1f22;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.nav-link.active {
+  color: #5ece7b;
+  border-bottom-color: #5ece7b;
+}
+
+.header-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.logo-image {
+  height: 41px; /* Match the height of the previous SVG logo */
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-weight: 500;
+}
+
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cart-item-count {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background-color: #1d1f22;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+}
