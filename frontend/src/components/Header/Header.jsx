@@ -33,7 +33,7 @@ const Header = () => {
         <img src={logo} alt="Shop Logo" className="logo-image" />
       </div>
       <div className="header-actions">
-        <button onClick={() => setIsCartOpen(true)} className="cart-btn" data-testid="cart-btn">
+        <button onClick={() => setIsCartOpen(prev => !prev)} className="cart-btn" data-testid="cart-btn">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 1H3.63636L5.39091 11.8545H16.3636L19 4.54545H4.54545" stroke="#1D1F22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M6.27271 15.4545C6.27271 16.3335 5.55626 17.0499 4.67727 17.0499C3.79828 17.0499 3.08182 16.3335 3.08182 15.4545C3.08182 14.5755 3.79828 13.8591 4.67727 13.8591C5.55626 13.8591 6.27271 14.5755 6.27271 15.4545Z" stroke="#1D1F22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

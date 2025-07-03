@@ -82,6 +82,7 @@ class Product
                 // Simplified data for list view
                 'gallery' => $this->getFirstGalleryImage($row['id']),
                 'prices' => $this->getFirstPrice($row['id']),
+                'attributes' => $this->getBasicAttributes($row['id']), // Add this
             ];
         }
         return $products;
@@ -102,5 +103,19 @@ class Product
         $stmt->execute(['id' => $productId]);
         $price = $stmt->fetch();
         return $price ? [$price] : [];
+    }
+
+    private function getBasicAttributes(string $productId): array
+    {
+        $stmt = $this->db->prepare("SELECT id, name, type FROM attribute_sets WHERE product_id = :id");
+        $stmt->execute(['id' => $productId]);
+        $attributes = $stmt->fetchAll();
+
+        $itemStmt = $this->db->prepare("SELECT display_value, value FROM attribute_items WHERE attribute_set_id = :attribute_set_id");
+        foreach ($attributes as $key => $attribute) {
+            $itemStmt->execute(['attribute_set_id' => $attribute['id']]);
+            $attributes[$key]['items'] = $itemStmt->fetchAll();
+        }
+        return $attributes;
     }
 }

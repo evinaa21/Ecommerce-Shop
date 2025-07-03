@@ -16,7 +16,6 @@ const ProductCard = ({ product }) => {
       return acc;
     }, {});
     addToCart(product, defaultAttributes);
-    alert(`${name} added to cart!`); // Optional: give user feedback
   };
 
   const kebabCaseName = name.replace(/\s+/g, '-').toLowerCase();

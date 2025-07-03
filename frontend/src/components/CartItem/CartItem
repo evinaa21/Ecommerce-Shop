@@ -1,0 +1,49 @@
+import React from 'react';
+import { useCart } from '../../context/CartContext';
+import './CartItem.css';
+
+const CartItem = ({ item }) => {
+  const { updateQuantity } = useCart();
+  const { name, brand, prices, attributes, gallery, quantity, cartId, selectedAttributes } = item;
+  const price = prices[0];
+
+  const kebabCase = (str) => str.replace(/\s+/g, '-').toLowerCase();
+
+  return (
+    <div className="cart-item">
+      <div className="item-details">
+        <p className="item-brand">{brand}</p>
+        <p className="item-name">{name}</p>
+        <p className="item-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
+        {attributes.map((attr) => (
+          <div key={attr.id} className="item-attribute">
+            <p className="attribute-name">{attr.name}:</p>
+            <div className="attribute-values">
+              {attr.items.map((item) => {
+                const isSelected = selectedAttributes[attr.id] === item.value;
+                return (
+                  <div
+                    key={item.id}
+                    className={`attribute-value ${kebabCase(attr.name)} ${isSelected ? 'selected' : ''}`}
+                    style={{
+                      backgroundColor: attr.name === 'Color' ? item.value : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => updateQuantity(cartId, item.value, attr.id)}
+                  >
+                    {attr.name !== 'Color' && item.value}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="item-image">
+        <img src={gallery[0]} alt={name} />
+      </div>
+    </div>
+  );
+};
+
+export default CartItem;
