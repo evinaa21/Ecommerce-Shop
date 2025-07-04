@@ -22,22 +22,32 @@ const CartOverlay = () => {
       productId: item.id,
       quantity: item.quantity,
       price: item.prices[0].amount,
-      attributes: Object.entries(item.selectedAttributes).map(([name, value]) => ({
-        name: name,
-        value: value
-      }))
+      // Make sure attributes match the backend expected format
+      attributes: Object.entries(item.selectedAttributes).map(([attributeId, value]) => {
+        // Find the attribute name from the item's attributes array
+        const attribute = item.attributes.find(attr => attr.id === attributeId);
+        return {
+          name: attribute ? attribute.name : attributeId,
+          value: value
+        };
+      })
     }));
 
     try {
-      await placeOrder({ 
+      const { data } = await placeOrder({ 
         variables: { 
           products: products,
           total: parseFloat(totalPrice.toFixed(2))
         } 
       });
-      alert('Order placed successfully!');
-      clearCart();
-      setIsCartOpen(false);
+      
+      if (data.createOrder.success) {
+        alert(data.createOrder.message);
+        clearCart();
+        setIsCartOpen(false);
+      } else {
+        alert(`Error: ${data.createOrder.message}`);
+      }
     } catch (e) {
       console.error('Error placing order:', e);
       alert(`Error placing order: ${e.message}`);
@@ -48,7 +58,7 @@ const CartOverlay = () => {
     <div className="cart-overlay-backdrop" onClick={() => setIsCartOpen(false)}>
       <div className="cart-overlay-container" onClick={(e) => e.stopPropagation()}>
         <div className="cart-overlay-header">
-          <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'item' : 'items'}
+          <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
         </div>
         <div className="cart-item-list">
           {cartItems.map((item) => (

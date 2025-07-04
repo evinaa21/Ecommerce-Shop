@@ -20,11 +20,11 @@
 .nav-link {
   text-decoration: none;
   color: #1d1f22;
-  padding: 0 16px;
+  padding: 0 8px;
   display: flex;
   align-items: center;
   border-bottom: 2px solid transparent;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
 }
 

@@ -30,7 +30,6 @@ const CartItem = ({ item }) => {
                 return (
                   <button
                     key={option.value}
-                    onClick={() => updateAttributes(cartId, { [attr.id]: option.value })}
                     className={`
                       attribute-button
                       ${attr.type === 'swatch' ? 'swatch' : ''}
@@ -39,6 +38,7 @@ const CartItem = ({ item }) => {
                     style={attr.type === 'swatch' ? { backgroundColor: option.value } : {}}
                     data-testid={isSelected ? `${testId}-selected` : testId}
                     aria-label={`Select ${attr.name} ${option.display_value}`}
+                    disabled
                   >
                     {attr.type !== 'swatch' && option.value}
                   </button>
