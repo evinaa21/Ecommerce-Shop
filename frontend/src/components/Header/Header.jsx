@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
 import { useCart } from '../../context/CartContext';
 import './Header.css';
-import logo from '../../assets/a-logo.png'; // Import the logo
+import logo from '../../assets/icon.png'; // Import the logo
 
 const Header = () => {
   const { loading, error, data } = useQuery(GET_CATEGORIES);
