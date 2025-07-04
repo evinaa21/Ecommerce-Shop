@@ -58,7 +58,7 @@ const CartOverlay = () => {
         <div className="cart-overlay-footer">
           <div className="cart-total" data-testid="cart-total">
             <span>Total</span>
-            <span>${totalPrice.toFixed(2)}</span>
+            <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
           </div>
           <div className="cart-actions">
             <button

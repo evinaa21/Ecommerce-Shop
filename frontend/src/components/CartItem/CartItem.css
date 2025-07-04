@@ -1,11 +1,11 @@
 .cart-item {
   display: flex;
   justify-content: space-between;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e5e5e5;
-  margin-bottom: 20px;
+  gap: 8px; /* Add gap between details and controls */
+  position: relative;
 }
 
+/* Remove the border logic as it's handled by gap in the parent list */
 .cart-item:last-child {
   border-bottom: none;
   margin-bottom: 0;
@@ -15,24 +15,16 @@
 .item-details {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  padding-right: 20px;
+  flex-grow: 1;
+  gap: 3px; /* Add more gap between price and attributes */
 }
 
-.item-brand {
-  font-weight: 300;
-  font-size: 16px;
-  line-height: 1.6;
-  margin: 0 0 0 0;
-  color: #1d1f22;
-  font-family: "Raleway", sans-serif;
-}
-
+.item-brand,
 .item-name {
-  font-weight: 300;
-  font-size: 16px;
+  font-weight: 400;
+  font-size: 18px;
   line-height: 1.6;
-  margin: 0 0 8px 0;
+  margin: 0;
   color: #1d1f22;
   font-family: "Raleway", sans-serif;
 }
@@ -41,39 +33,41 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 1.6;
-  margin: 0 0 8px 0;
+  margin: 0;
   color: #1d1f22;
   font-family: "Raleway", sans-serif;
 }
 
 .item-attributes {
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* gap between different attribute groups (Size vs Color) */
 }
 
-.item-attributes .attribute-name {
+.attribute-name {
+  font-family: "Raleway", sans-serif;
   font-weight: 400;
   font-size: 14px;
-  margin: 0 0 8px 0;
-  color: #1d1f22;
-  text-transform: uppercase;
-  font-family: "Source Sans Pro", sans-serif;
+  margin: 0 0 2px 0; /* small gap between label and its options */
+  line-height: 1.6;
 }
 
 .attribute-options {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 6px; /* gap between individual buttons */
+  margin-bottom: 0; /* remove extra margin since gap handles spacing */
 }
 
 .attribute-button {
-  min-width: 24px;
-  height: 24px;
-  padding: 0 4px;
+  min-width: 24px; /* was 24px */
+  height: 24px; /* was 24px */
+  padding: 0 4px; /* a little side padding for labels */
+  font-size: 10px; /* was 12px */
   background-color: #fff;
   border: 1px solid #1d1f22;
   font-family: "Source Sans Pro", sans-serif;
-  font-size: 14px;
-  cursor: default;
+  cursor: pointer; /* Make it a pointer since it's clickable */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,9 +75,9 @@
 }
 
 .attribute-button.swatch {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
+  width: px; /* was 16px */
+  height: 16px; /* was 16px */
+  min-width: 16px;
   border: 1px solid #1d1f22;
   padding: 0;
 }
@@ -94,16 +88,15 @@
 }
 
 .attribute-button.swatch.selected {
-  outline: 2px solid #5ece7b;
+  outline: 1px solid #5ece7b;
   outline-offset: 1px;
-  background-color: inherit;
-  color: inherit;
+  /* The swatch color is set via inline style, so no need to change background here */
 }
 
 .item-controls {
   display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  gap: 10px;
+  align-items: stretch; /* Make controls stretch to the same height */
 }
 
 .quantity-controls {
@@ -111,13 +104,12 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 137px;
 }
 
 .quantity-controls button {
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
+  width: 28px; /* was 24px */
+  height: 28px; /* was 24px */
+  font-size: 18px; /* make the “+”/“–” legible */
   background-color: #fff;
   border: 1px solid #1d1f22;
   cursor: pointer;
@@ -128,20 +120,21 @@
 }
 
 .quantity-controls button:hover {
-  background-color: #1d1f22;
-  color: #fff;
+  background-color: #f0f0f0;
 }
 
 .quantity-controls span {
+  font-size: 16px; /* ensure the counter sits nicely between buttons */
   font-weight: 500;
-  font-size: 16px;
   line-height: 1.6;
   font-family: "Raleway", sans-serif;
 }
 
 .item-image-container {
-  width: 105px;
-  height: 137px;
+  width: 121px; /* Adjusted width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .item-image {

@@ -3,19 +3,24 @@ import { useCart } from '../../context/CartContext';
 import './CartItem.css';
 
 const CartItem = ({ item }) => {
-  const { updateQuantity } = useCart();
+  const { updateQuantity, updateAttributes } = useCart();
   const { name, brand, prices, attributes, gallery, quantity, cartId, selectedAttributes } = item;
-  const price = prices[0];
+  
+  // Safely access the price. If it doesn't exist, the component won't render the price section.
+  const price = prices && prices.length > 0 ? prices[0] : null;
 
-  const kebabCase = (str) => str.replace(/\s+/g, '-').toLowerCase();
+  const kebabCase = (str) => str ? str.replace(/\s+/g, '-').toLowerCase() : '';
 
   return (
-    <div className="cart-item">
+    <div className="cart-item" data-testid={`cart-item-${cartId}`}>
       <div className="item-details">
-        <p className="item-brand">{brand}</p>
+        
         <p className="item-name">{name}</p>
-        <p className="item-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
-        {attributes.map((attr) => (
+        {/* Only render price if it exists */}
+        {price && (
+          <p className="item-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
+        )}
+        {attributes && attributes.map((attr) => (
           <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${kebabCase(attr.name)}`}>
             <p className="attribute-name">{attr.name}:</p>
             <div className="attribute-options">
@@ -25,6 +30,7 @@ const CartItem = ({ item }) => {
                 return (
                   <button
                     key={option.value}
+                    onClick={() => updateAttributes(cartId, { [attr.id]: option.value })}
                     className={`
                       attribute-button
                       ${attr.type === 'swatch' ? 'swatch' : ''}
@@ -32,8 +38,9 @@ const CartItem = ({ item }) => {
                     `}
                     style={attr.type === 'swatch' ? { backgroundColor: option.value } : {}}
                     data-testid={isSelected ? `${testId}-selected` : testId}
+                    aria-label={`Select ${attr.name} ${option.display_value}`}
                   >
-                    {attr.type !== 'swatch' && option.display_value}
+                    {attr.type !== 'swatch' && option.value}
                   </button>
                 );
               })}

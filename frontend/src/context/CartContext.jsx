@@ -68,6 +68,20 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const updateAttributes = (cartId, newAttributes) => {
+    setCartItems((prevItems) => {
+      return prevItems.map((item) => {
+        if (item.cartId === cartId) {
+          return { 
+            ...item, 
+            selectedAttributes: { ...item.selectedAttributes, ...newAttributes } 
+          };
+        }
+        return item;
+      });
+    });
+  };
+
   const clearCart = () => {
     setCartItems([]);
   };
@@ -79,6 +93,7 @@ export const CartProvider = ({ children }) => {
     successMessage,
     addToCart,
     updateQuantity,
+    updateAttributes, // Add this line
     clearCart,
   };
 
