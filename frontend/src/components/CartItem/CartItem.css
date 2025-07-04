@@ -75,8 +75,8 @@
 }
 
 .attribute-button.swatch {
-  width: px; /* was 16px */
-  height: 16px; /* was 16px */
+  width: 16px; /* was missing the number before 'px' */
+  height: 16px;
   min-width: 16px;
   border: 1px solid #1d1f22;
   padding: 0;
