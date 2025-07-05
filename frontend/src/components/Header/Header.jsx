@@ -13,29 +13,19 @@ const Header = () => {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Function to determine if a category should be active
-  const isCategoryActive = (categoryName) => {
-    const pathParts = location.pathname.split('/');
-    
-    // If we're on a category page, check if it matches
-    if (pathParts[1] === 'category' && pathParts[2] === categoryName) {
-      return true;
-    }
-    
-    // If we're on a product page, check if it matches the current category
-    if (pathParts[1] === 'product' && currentCategory === categoryName) {
-      return true;
-    }
-    
-    return false;
-  };
+  // Fallback categories if GraphQL fails
+  const fallbackCategories = [
+    { name: 'all' },
+    { name: 'clothes' },
+    { name: 'tech' }
+  ];
+
+  const categories = data?.categories || fallbackCategories;
 
   const handleCartToggle = () => {
     if (isCartOpen) {
-      // If cart is open, close it (CartOverlay will handle the animation)
       setIsCartOpen(false);
     } else {
-      // If cart is closed, open it
       setIsCartOpen(true);
     }
   };
@@ -43,33 +33,30 @@ const Header = () => {
   return (
     <header className="header">
       <nav className="header-nav">
-        {loading && <p>Loading...</p>}
-        {error && <p>Error.</p>}
-        {data &&
-          data.categories.map((category) => {
-            const { name } = category;
-            
-            // Map backend category names to frontend URLs
-            const urlMapping = {
-              'tech': 'tech',  // Keep tech as tech instead of mapping to electronics
-              'clothes': 'clothes',
-              'all': 'all'
-            };
-            
-            const urlPath = urlMapping[name] || name;
-            const isActive = location.pathname === `/${urlPath}`;
-            
-            return (
-              <NavLink
-                key={name}
-                to={`/${urlPath}`}  // Use mapped URL path
-                className={isActive ? 'nav-link active' : 'nav-link'}
-                data-testid={isActive ? 'active-category-link' : 'category-link'}
-              >
-                {name.toUpperCase()}
-              </NavLink>
-            );
-          })}
+        {categories.map((category) => {
+          const { name } = category;
+          
+          // Map backend category names to frontend URLs
+          const urlMapping = {
+            'tech': 'tech',
+            'clothes': 'clothes',
+            'all': 'all'
+          };
+          
+          const urlPath = urlMapping[name] || name;
+          const isActive = location.pathname === `/${urlPath}`;
+          
+          return (
+            <NavLink
+              key={name}
+              to={`/${urlPath}`}
+              className={isActive ? 'nav-link active' : 'nav-link'}
+              data-testid={isActive ? 'active-category-link' : 'category-link'}
+            >
+              {name.toUpperCase()}
+            </NavLink>
+          );
+        })}
       </nav>
       <div className="header-logo">
         <img src={logo} alt="Shop Logo" className="logo-image" />
