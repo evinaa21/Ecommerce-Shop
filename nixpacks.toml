@@ -1,8 +1,11 @@
+[providers]
+php = "8.1"
+
 [phases.build]
-cmds = ["cd backend && composer install --no-dev"]
+cmds = ["cd backend && composer install --no-dev --optimize-autoloader"]
 
 [phases.start]
-cmd = "cd backend && php -S 0.0.0.0:$PORT"
+cmd = "cd backend && php -S 0.0.0.0:$PORT -t public"
 
 [variables]
 NIXPACKS_METADATA = "php"
