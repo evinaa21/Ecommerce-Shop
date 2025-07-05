@@ -1,0 +1,8 @@
+[phases.build]
+cmds = ["cd backend && composer install --no-dev"]
+
+[phases.start]
+cmd = "cd backend && php -S 0.0.0.0:$PORT"
+
+[variables]
+NIXPACKS_METADATA = "php"
