@@ -7,7 +7,7 @@ import App from './App.jsx';
 import './index.css';
 
 const client = new ApolloClient({
-  uri: 'https://ecommerce-shop-production-782b.up.railway.app/',
+  uri: 'http://ecommerce-test.great-site.net/backend/graphql.php',
   cache: new InMemoryCache(),
 });
 
