@@ -1,19 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER } from '../../graphql/mutations';
-import CartItem from '../CartItem/CartItem.jsx'; // Update the import path
+import CartItem from '../CartItem/CartItem.jsx';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
   const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
   const [placeOrder, { loading, error }] = useMutation(PLACE_ORDER);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  if (!isCartOpen) return null;
+  useEffect(() => {
+    if (isCartOpen) {
+      // Opening cart
+      setIsVisible(true);
+      setIsClosing(false);
+    } else {
+      // Closing cart - always trigger closing animation if cart was visible
+      if (isVisible) {
+        setIsClosing(true);
+        const timer = setTimeout(() => {
+          setIsVisible(false);
+          setIsClosing(false);
+        }, 300); // Match animation duration
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isCartOpen, isVisible]); // Add isVisible back to dependencies
+
+  if (!isVisible) return null;
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => {
-    const price = item.prices[0].amount; // Assuming first currency
+    const price = item.prices[0].amount;
     return sum + price * item.quantity;
   }, 0);
 
@@ -22,9 +42,7 @@ const CartOverlay = () => {
       productId: item.id,
       quantity: item.quantity,
       price: item.prices[0].amount,
-      // Make sure attributes match the backend expected format
       attributes: Object.entries(item.selectedAttributes).map(([attributeId, value]) => {
-        // Find the attribute name from the item's attributes array
         const attribute = item.attributes.find(attr => attr.id === attributeId);
         return {
           name: attribute ? attribute.name : attributeId,
@@ -54,9 +72,21 @@ const CartOverlay = () => {
     }
   };
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setIsCartOpen(false);
+    }
+  };
+
   return (
-    <div className="cart-overlay-backdrop" onClick={() => setIsCartOpen(false)}>
-      <div className="cart-overlay-container" onClick={(e) => e.stopPropagation()}>
+    <div 
+      className={`cart-overlay-backdrop ${isClosing ? 'closing' : ''}`}
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className={`cart-overlay-container ${isClosing ? 'closing' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="cart-overlay-header">
           <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
         </div>

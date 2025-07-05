@@ -95,15 +95,6 @@
   margin-left: 20px; /* Add left margin to push details right */
 }
 
-.product-brand {
-  font-family: "Raleway", sans-serif;
-  font-weight: 600;
-  font-size: 30px;
-  line-height: 27px;
-  color: #1d1f22;
-  margin: 0;
-}
-
 .product-name {
   font-family: "Raleway", sans-serif;
   font-weight: 400;
@@ -111,7 +102,6 @@
   line-height: 27px;
   color: #1d1f22;
   margin: 0;
-  margin-top: -10px; /* Bring name closer to brand */
 }
 
 .product-attribute {

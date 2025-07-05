@@ -88,6 +88,13 @@ const ProductPage = () => {
 
   const getSizeInitials = (value) => {
     if (!value) return '';
+    
+    // Check if it's a numeric size (like shoe sizes: 40, 41, 42, etc.)
+    if (!isNaN(value) || /^\d+/.test(value)) {
+      return value; // Return the full numeric value
+    }
+    
+    // For text sizes like "Small", "Medium", "Large", "Extra Large"
     const words = value.split(' ');
     if (words.length > 1) {
       return words.map(word => {
@@ -139,7 +146,6 @@ const ProductPage = () => {
 
         {/* Product Details */}
         <div className="product-details">
-          <div className="product-brand">{product.brand}</div>
           <h1 className="product-name">{product.name}</h1>
           
           {/* Product Attributes */}
