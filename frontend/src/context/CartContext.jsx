@@ -15,6 +15,7 @@ export const CartProvider = ({ children }) => {
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [currentCategory, setCurrentCategory] = useState('all');
 
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -91,6 +92,8 @@ export const CartProvider = ({ children }) => {
     isCartOpen,
     setIsCartOpen,
     successMessage,
+    currentCategory,
+    setCurrentCategory,
     addToCart,
     updateQuantity,
     updateAttributes, // Add this line

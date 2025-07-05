@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import Header from './components/Header/Header';
 import CategoryPage from './pages/CategoryPage/CategoryPage';
+import ProductPage from './pages/ProductPage/ProductPage';
 import CartOverlay from './components/CartOverlay/CartOverlay';
 import SuccessMessage from './components/SuccessMessage/SuccessMessage';
 import { useCart } from './context/CartContext';
@@ -17,7 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/category/all" replace />} />
           <Route path="/category/:categoryName" element={<CategoryPage />} />
-          {/* <Route path="/product/:productId" element={<ProductPage />} /> */}
+          <Route path="/product/:productId" element={<ProductPage />} />
         </Routes>
       </main>
       <CartOverlay />

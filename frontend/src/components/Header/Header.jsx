@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
 import { useCart } from '../../context/CartContext';
@@ -7,10 +7,28 @@ import './Header.css';
 import logo from '../../assets/icon.png'; // Import the logo
 
 const Header = () => {
+  const location = useLocation();
   const { loading, error, data } = useQuery(GET_CATEGORIES);
-  const { cartItems, setIsCartOpen } = useCart();
+  const { cartItems, setIsCartOpen, currentCategory } = useCart();
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Function to determine if a category should be active
+  const isCategoryActive = (categoryName) => {
+    const pathParts = location.pathname.split('/');
+    
+    // If we're on a category page, check if it matches
+    if (pathParts[1] === 'category' && pathParts[2] === categoryName) {
+      return true;
+    }
+    
+    // If we're on a product page, check if it matches the current category
+    if (pathParts[1] === 'product' && currentCategory === categoryName) {
+      return true;
+    }
+    
+    return false;
+  };
 
   return (
     <header className="header">
@@ -18,16 +36,20 @@ const Header = () => {
         {loading && <p>Loading...</p>}
         {error && <p>Error.</p>}
         {data &&
-          data.categories.map(({ name }) => (
-            <NavLink
-              key={name}
-              to={`/category/${name}`}
-              className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-              data-testid={({ isActive }) => (isActive ? 'active-category-link' : 'category-link')}
-            >
-              {name.toUpperCase()}
-            </NavLink>
-          ))}
+          data.categories.map(({ name }) => {
+            const isActive = isCategoryActive(name);
+            console.log(`Category: ${name}, Current: ${currentCategory}, Active: ${isActive}`); // Debug log
+            return (
+              <NavLink
+                key={name}
+                to={`/category/${name}`}
+                className={isActive ? 'nav-link active' : 'nav-link'}
+                data-testid={isActive ? 'active-category-link' : 'category-link'}
+              >
+                {name.toUpperCase()}
+              </NavLink>
+            );
+          })}
       </nav>
       <div className="header-logo">
         <img src={logo} alt="Shop Logo" className="logo-image" />
