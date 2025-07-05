@@ -1,8 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 const httpLink = new HttpLink({
-  // This should point to your local PHP server's GraphQL endpoint
-  uri: 'http://localhost/Ecommerce-Shop/backend/public/', 
+  uri: 'https://ecommerce-shop-production-782b.up.railway.app/',
 });
 
 const client = new ApolloClient({
