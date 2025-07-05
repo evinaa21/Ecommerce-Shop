@@ -5,7 +5,7 @@ php = "8.1"
 cmds = ["cd backend && composer install --no-dev --optimize-autoloader"]
 
 [phases.start]
-cmd = "cd backend && php -S 0.0.0.0:$PORT -t public"
+cmd = "cd backend && php -S 0.0.0.0:$PORT"
 
 [variables]
 NIXPACKS_METADATA = "php"
