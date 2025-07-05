@@ -46,13 +46,23 @@ const Header = () => {
         {loading && <p>Loading...</p>}
         {error && <p>Error.</p>}
         {data &&
-          data.categories.map(({ name }) => {
-            const isActive = isCategoryActive(name);
-            console.log(`Category: ${name}, Current: ${currentCategory}, Active: ${isActive}`); // Debug log
+          data.categories.map((category) => {
+            const { name } = category;
+            
+            // Map backend category names to frontend URLs
+            const urlMapping = {
+              'tech': 'tech',  // Keep tech as tech instead of mapping to electronics
+              'clothes': 'clothes',
+              'all': 'all'
+            };
+            
+            const urlPath = urlMapping[name] || name;
+            const isActive = location.pathname === `/${urlPath}`;
+            
             return (
               <NavLink
                 key={name}
-                to={`/category/${name}`}
+                to={`/${urlPath}`}  // Use mapped URL path
                 className={isActive ? 'nav-link active' : 'nav-link'}
                 data-testid={isActive ? 'active-category-link' : 'category-link'}
               >

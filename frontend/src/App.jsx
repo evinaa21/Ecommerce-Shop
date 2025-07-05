@@ -16,8 +16,10 @@ function App() {
       <Header />
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<Navigate to="/category/all" replace />} />
-          <Route path="/category/:categoryName" element={<CategoryPage />} />
+          <Route path="/" element={<Navigate to="/all" replace />} />
+          <Route path="/all" element={<CategoryPage />} />
+          <Route path="/clothes" element={<CategoryPage />} />
+          <Route path="/tech" element={<CategoryPage />} />
           <Route path="/product/:productId" element={<ProductPage />} />
         </Routes>
       </main>
