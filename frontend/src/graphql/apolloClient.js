@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 const httpLink = new HttpLink({
-  uri: 'http://ecommerce-test.great-site.net/backend/graphql.php',
+  uri: 'https://ecommerce-test.great-site.net/backend/public/', // Correct path to public/index.php
 });
 
 const client = new ApolloClient({

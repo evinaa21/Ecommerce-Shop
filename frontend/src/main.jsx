@@ -7,7 +7,7 @@ import App from './App.jsx';
 import './index.css';
 
 const client = new ApolloClient({
-  uri: 'http://ecommerce-test.great-site.net/backend/graphql.php',
+  uri: 'https://ecommerce-test.great-site.net/backend/public/', // Correct path to public/index.php
   cache: new InMemoryCache(),
 });
 
