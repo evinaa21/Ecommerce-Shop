@@ -1,5 +1,11 @@
 [build]
 builder = "nixpacks"
 
-[deploy]
-startCommand = "cd backend && php -S 0.0.0.0:$PORT public/index.php"
+[build.nixpacks]
+providers = ["php"]
+
+[phases.build]
+cmds = ["cd backend && composer install --no-dev --optimize-autoloader"]
+
+[phases.start]
+cmd = "cd backend && php -S 0.0.0.0:$PORT public/index.php"
