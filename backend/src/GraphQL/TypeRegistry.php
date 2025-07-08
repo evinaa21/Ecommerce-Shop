@@ -8,6 +8,7 @@ use App\GraphQL\Types\ProductType;
 use App\GraphQL\Types\AttributeSetType;
 use App\GraphQL\Types\AttributeItemType;
 use App\GraphQL\Types\PriceType;
+use App\GraphQL\Types\OrderInputType;
 
 class TypeRegistry
 {
@@ -36,5 +37,10 @@ class TypeRegistry
     public static function priceType(): PriceType
     {
         return self::$types[PriceType::class] ??= new PriceType();
+    }
+
+    public static function orderInputType(): OrderInputType
+    {
+        return self::$types[OrderInputType::class] ??= new OrderInputType();
     }
 }

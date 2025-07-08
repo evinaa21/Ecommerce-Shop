@@ -28,12 +28,11 @@ class Order
         $this->db->beginTransaction();
 
         try {
-            // 1. Insert into the main 'orders' table
+
             $stmt = $this->db->prepare("INSERT INTO orders (total_amount) VALUES (:total)");
             $stmt->execute(['total' => $total]);
             $orderId = $this->db->lastInsertId();
 
-            // 2. Insert each product into the 'order_items' table
             $stmt = $this->db->prepare(
                 "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase, attributes_json) 
                  VALUES (:order_id, :product_id, :quantity, :price, :attributes)"
@@ -49,14 +48,11 @@ class Order
                 ]);
             }
 
-            // 3. If everything was successful, commit the changes
             $this->db->commit();
             return true;
 
         } catch (Exception $e) {
-            // If anything went wrong, roll back all changes
             $this->db->rollBack();
-            // In a real app, you would log the error: error_log($e->getMessage());
             return false;
         }
     }

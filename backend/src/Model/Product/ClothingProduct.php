@@ -10,7 +10,7 @@ class ClothingProduct extends AbstractProduct
 {
     protected function loadAttributes(): void
     {
-        // A clothing product might have specific logic, but for now, we load all attributes.
+        // loads all attr
         $stmt = $this->db->prepare("SELECT id, name, type FROM attribute_sets WHERE product_id = :id");
         $stmt->execute(['id' => $this->id]);
         $attributes = $stmt->fetchAll();

@@ -10,8 +10,7 @@ class TechProduct extends AbstractProduct
 {
     protected function loadAttributes(): void
     {
-        // A tech product could have different logic, e.g., filtering for specific tech attributes.
-        // For this test, demonstrating the structure is key. The logic can be identical for now.
+
         $stmt = $this->db->prepare("SELECT id, name, type FROM attribute_sets WHERE product_id = :id");
         $stmt->execute(['id' => $this->id]);
         $attributes = $stmt->fetchAll();

@@ -23,7 +23,7 @@ use GraphQL\Type\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
-// Handle GET introspection / health-check
+// health check
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $db = \App\Config\Database::getConnection();
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
-// Handle POST GraphQL requests
+// handles POST GraphQL requests
 $rawInput = file_get_contents('php://input');
 $input = json_decode($rawInput, true) ?: [];
 $query = $input['query'] ?? null;

@@ -17,7 +17,7 @@ class Database
         if (self::$connection === null) {
             error_log("Creating new database connection...");
 
-            // Load .env file only for local development
+
             if (file_exists(__DIR__ . '/../../.env') && !isset($_ENV['MYSQL_URL'])) {
                 error_log("Loading .env file for local development");
                 try {
@@ -31,7 +31,7 @@ class Database
                 error_log("Skipping .env file - using Railway environment variables");
             }
 
-            // Debug all environment variables
+            // debug for all environment variables
             error_log("=== ALL MYSQL ENVIRONMENT VARIABLES ===");
             error_log("MYSQL_URL: " . ($_ENV['MYSQL_URL'] ?? 'NOT SET'));
             error_log("MYSQLHOST: " . ($_ENV['MYSQLHOST'] ?? 'NOT SET'));
@@ -43,7 +43,7 @@ class Database
 
             $connectionEstablished = false;
 
-            // Try MYSQL_URL first (Railway's preferred method)
+
             if (!empty($_ENV['MYSQL_URL'])) {
                 $dsn = $_ENV['MYSQL_URL'];
                 error_log("Attempting connection with MYSQL_URL: " . $dsn);
@@ -62,12 +62,12 @@ class Database
                 }
             }
 
-            // Fallback if MYSQL_URL failed or not present
+
             if (!$connectionEstablished) {
                 error_log("Attempting fallback by parsing MYSQL_URL or using ENV vars…");
 
                 if (!empty($_ENV['MYSQL_URL'])) {
-                    // parse full URL
+
                     $parts = parse_url($_ENV['MYSQL_URL']);
                     $host = $parts['host'] ?? 'localhost';
                     $port = $parts['port'] ?? '3306';
@@ -76,7 +76,7 @@ class Database
                     $db = ltrim($parts['path'] ?? '', '/');
                     error_log("Parsed fallback from MYSQL_URL: host=$host port=$port db=$db user=$user");
                 } else {
-                    // legacy env-var fallback
+
                     $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
                     $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
                     $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';

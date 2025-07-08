@@ -72,14 +72,11 @@ class Product
 
         $products = [];
         while ($row = $stmt->fetch()) {
-            // We don't need to load details here as the factory does it.
-            // We just need enough info for the product list page.
             $products[] = [
                 'id' => $row['id'],
                 'name' => $row['name'],
                 'in_stock' => $row['in_stock'],
                 'brand' => $row['brand'],
-                // Simplified data for list view
                 'gallery' => $this->getFirstGalleryImage($row['id']),
                 'prices' => $this->getFirstPrice($row['id']),
                 'attributes' => $this->getBasicAttributes($row['id']), // Add this
@@ -88,7 +85,6 @@ class Product
         return $products;
     }
 
-    // Helper methods for the list view to keep it fast
     private function getFirstGalleryImage(string $productId): array
     {
         $stmt = $this->db->prepare("SELECT url FROM product_gallery WHERE product_id = :id ORDER BY id LIMIT 1");

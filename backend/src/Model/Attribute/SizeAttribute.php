@@ -9,7 +9,7 @@ class SizeAttribute extends AbstractAttribute
 {
     public function render(): array
     {
-        // Size-specific rendering logic
+
         return $this->toArray();
     }
 }
