@@ -155,7 +155,6 @@
   cursor: not-allowed;
 }
 
-/* Enhanced mobile responsiveness */
 @media (max-width: 768px) {
   .cart-overlay-backdrop {
     padding-right: 20px;

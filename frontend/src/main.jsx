@@ -7,7 +7,7 @@ import App from './App.jsx';
 import './index.css';
 
 const client = new ApolloClient({
-  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', // Updated Railway URL
+  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', 
   cache: new InMemoryCache(),
 });
 

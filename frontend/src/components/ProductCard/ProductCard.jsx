@@ -7,13 +7,11 @@ const ProductCard = ({ product }) => {
   const { name, in_stock, gallery, prices, id, attributes } = product;
   const { addToCart } = useCart();
 
-  const price = prices[0]; // Assuming the first price is the one to display
-
+  const price = prices[0]; 
   const handleQuickShop = (e) => {
-    e.preventDefault(); // Prevent navigating to PDP on button click
+    e.preventDefault(); 
     const defaultAttributes = attributes.reduce((acc, attr) => {
-      acc[attr.id] = attr.items[0].value; // Select the first option's value for each attribute
-      return acc;
+      acc[attr.id] = attr.items[0].value;       return acc;
     }, {});
     addToCart(product, defaultAttributes);
   };

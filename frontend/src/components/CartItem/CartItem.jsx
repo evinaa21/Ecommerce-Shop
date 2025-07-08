@@ -6,8 +6,7 @@ const CartItem = ({ item }) => {
   const { updateQuantity, updateAttributes } = useCart();
   const { name, brand, prices, attributes, gallery, quantity, cartId, selectedAttributes } = item;
   
-  // Safely access the price. If it doesn't exist, the component won't render the price section.
-  const price = prices && prices.length > 0 ? prices[0] : null;
+   const price = prices && prices.length > 0 ? prices[0] : null;
 
   const kebabCase = (str) => str ? str.replace(/\s+/g, '-').toLowerCase() : '';
 

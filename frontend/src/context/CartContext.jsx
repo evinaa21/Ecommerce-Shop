@@ -25,11 +25,10 @@ export const CartProvider = ({ children }) => {
     setSuccessMessage(message);
     setTimeout(() => {
       setSuccessMessage('');
-    }, 3000); // Message disappears after 3 seconds
+    }, 3000); 
   };
 
   const addToCart = (product, selectedAttributes) => {
-    // Create a plain object copy of the product to avoid issues
     const productToAdd = {
       id: product.id,
       name: product.name,
@@ -64,8 +63,7 @@ export const CartProvider = ({ children }) => {
           }
           return item;
         })
-        .filter((item) => item.quantity > 0); // Remove item if quantity is 0 or less
-      return updatedItems;
+        .filter((item) => item.quantity > 0);       return updatedItems;
     });
   };
 
@@ -96,7 +94,7 @@ export const CartProvider = ({ children }) => {
     setCurrentCategory,
     addToCart,
     updateQuantity,
-    updateAttributes, // Add this line
+    updateAttributes, 
     clearCart,
   };
 

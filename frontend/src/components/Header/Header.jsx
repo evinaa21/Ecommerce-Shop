@@ -13,8 +13,7 @@ const Header = () => {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Build a nav that *always* has all, clothes, tech first,
-  // then any other categories from the server.
+ 
   const base = ['all','clothes','tech'];
   const fetched = data?.categories?.map(c => c.name) || [];
   const unique = Array.from(new Set([...base, ...fetched]));
@@ -29,9 +28,7 @@ const Header = () => {
     }
   };
 
-  // Function to determine if a category should be active
   const isCategoryActive = (categoryName) => {
-    // Map backend category names to frontend URLs
     const urlMapping = {
       'tech': 'tech',
       'clothes': 'clothes',
@@ -40,12 +37,11 @@ const Header = () => {
     
     const urlPath = urlMapping[categoryName] || categoryName;
     
-    // If we're on a category page, check the URL
+ 
     if (location.pathname === `/${urlPath}`) {
       return true;
     }
     
-    // If we're on a product detail page, check the currentCategory from context
     if (location.pathname.startsWith('/product/')) {
       return currentCategory === categoryName;
     }
@@ -59,7 +55,6 @@ const Header = () => {
         {categories.map((category) => {
           const { name } = category;
           
-          // Map backend category names to frontend URLs
           const urlMapping = {
             'tech': 'tech',
             'clothes': 'clothes',

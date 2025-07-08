@@ -18,19 +18,16 @@ const ProductPage = () => {
 
   const product = data?.product;
 
-  // Set current category when product loads
   useEffect(() => {
     if (product?.category) {
       setCurrentCategory(product.category);
     }
   }, [product, setCurrentCategory]);
 
-  // Initialize selected attributes when product loads
   useEffect(() => {
     if (product?.attributes) {
       const initialAttributes = {};
       product.attributes.forEach((attr) => {
-        // Don't set default values - let user select them
         initialAttributes[attr.id] = '';
       });
       setSelectedAttributes(initialAttributes);
@@ -53,7 +50,6 @@ const ProductPage = () => {
   const isAddToCartDisabled = () => {
     if (!product.in_stock) return true;
     
-    // Check if all attributes have been selected
     return product.attributes.some(attr => !selectedAttributes[attr.id]);
   };
 
@@ -77,7 +73,6 @@ const ProductPage = () => {
   };
 
   const parseDescription = (html) => {
-    // Simple HTML parser without dangerouslySetInnerHTML
     return html
       .replace(/<p>/g, '')
       .replace(/<\/p>/g, '\n')
@@ -89,12 +84,11 @@ const ProductPage = () => {
   const getSizeInitials = (value) => {
     if (!value) return '';
     
-    // Check if it's a numeric size (like shoe sizes: 40, 41, 42, etc.)
     if (!isNaN(value) || /^\d+/.test(value)) {
-      return value; // Return the full numeric value
+      return value; 
     }
     
-    // For text sizes like "Small", "Medium", "Large", "Extra Large"
+    
     const words = value.split(' ');
     if (words.length > 1) {
       return words.map(word => {
@@ -110,7 +104,7 @@ const ProductPage = () => {
   return (
     <div className="product-page">
       <div className="product-container">
-        {/* Product Gallery */}
+        {}
         <div className="product-gallery" data-testid="product-gallery">
           <div className="gallery-thumbnails">
             {product.gallery.map((image, index) => (

@@ -1,11 +1,10 @@
 .cart-item {
   display: flex;
   justify-content: space-between;
-  gap: 8px; /* Add gap between details and controls */
+  gap: 8px;
   position: relative;
 }
 
-/* Remove the border logic as it's handled by gap in the parent list */
 .cart-item:last-child {
   border-bottom: none;
   margin-bottom: 0;
@@ -16,7 +15,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: 3px; /* Add more gap between price and attributes */
+  gap: 3px;
 }
 
 .item-brand,
@@ -41,33 +40,33 @@
 .item-attributes {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* gap between different attribute groups (Size vs Color) */
+  gap: 8px;
 }
 
 .attribute-name {
   font-family: "Raleway", sans-serif;
   font-weight: 400;
   font-size: 14px;
-  margin: 0 0 2px 0; /* small gap between label and its options */
+  margin: 0 0 2px 0;
   line-height: 1.6;
 }
 
 .attribute-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px; /* gap between individual buttons */
-  margin-bottom: 0; /* remove extra margin since gap handles spacing */
+  gap: 6px;
+  margin-bottom: 0;
 }
 
 .attribute-button {
-  min-width: 24px; /* was 24px */
-  height: 24px; /* was 24px */
-  padding: 0 4px; /* a little side padding for labels */
-  font-size: 10px; /* was 12px */
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  font-size: 10px;
   background-color: #fff;
   border: 1px solid #1d1f22;
   font-family: "Source Sans Pro", sans-serif;
-  cursor: pointer; /* Make it a pointer since it's clickable */
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,7 +74,7 @@
 }
 
 .attribute-button.swatch {
-  width: 16px; /* was missing the number before 'px' */
+  width: 16px;
   height: 16px;
   min-width: 16px;
   border: 1px solid #1d1f22;
@@ -90,13 +89,12 @@
 .attribute-button.swatch.selected {
   outline: 1px solid #5ece7b;
   outline-offset: 1px;
-  /* The swatch color is set via inline style, so no need to change background here */
 }
 
 .item-controls {
   display: flex;
   gap: 10px;
-  align-items: stretch; /* Make controls stretch to the same height */
+  align-items: stretch;
 }
 
 .quantity-controls {
@@ -107,9 +105,9 @@
 }
 
 .quantity-controls button {
-  width: 28px; /* was 24px */
-  height: 28px; /* was 24px */
-  font-size: 18px; /* make the “+”/“–” legible */
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
   background-color: #fff;
   border: 1px solid #1d1f22;
   cursor: pointer;
@@ -124,14 +122,14 @@
 }
 
 .quantity-controls span {
-  font-size: 16px; /* ensure the counter sits nicely between buttons */
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.6;
   font-family: "Raleway", sans-serif;
 }
 
 .item-image-container {
-  width: 121px; /* Adjusted width */
+  width: 121px;
   display: flex;
   align-items: center;
   justify-content: center;

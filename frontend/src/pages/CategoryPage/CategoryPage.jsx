@@ -7,12 +7,10 @@ import './CategoryPage.css';
 
 const CategoryPage = () => {
   const location = useLocation();
-  // Extract category from pathname (remove the leading slash)
   const urlCategory = location.pathname.substring(1);
   
-  // Map URL category to backend category name
   const categoryMapping = {
-    'tech': 'tech',  // Keep tech as tech
+    'tech': 'tech',  
     'clothes': 'clothes',
     'all': 'all'
   };
@@ -22,7 +20,6 @@ const CategoryPage = () => {
   console.log('URL Category:', urlCategory);
   console.log('Mapped Category Name:', categoryName);
   
-  // Add this query to see what categories exist
   const { data: categoriesData } = useQuery(GET_CATEGORIES);
   console.log('Available categories:', categoriesData?.categories);
   

@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 const httpLink = new HttpLink({
-  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', // This should still work
+  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', 
 });
 
 const client = new ApolloClient({

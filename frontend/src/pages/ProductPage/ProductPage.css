@@ -1,29 +1,29 @@
 .product-page {
-  padding: 10px 50px 80px 15px; /* Reduced top padding from 80px to 20px */
+  padding: 10px 50px 80px 15px;
   max-width: 1440px;
   margin: 0 auto;
 }
 
 .product-container {
   display: flex;
-  gap: 60px; /* Reduced gap to match the design */
+  gap: 60px;
   align-items: flex-start;
 }
 
 .product-gallery {
   display: flex;
-  gap: 30px; /* Reduced gap between thumbnails and main image */
+  gap: 30px;
   flex: 1;
-  max-width: 650px; /* Increased to give more space to gallery */
-  align-items: flex-start; /* Align thumbnails and main image to the top */
+  max-width: 650px;
+  align-items: flex-start;
 }
 
 .gallery-thumbnails {
   display: flex;
   flex-direction: column;
-  gap: 30px; /* Reduced gap between thumbnails */
+  gap: 30px;
   width: 80px;
-  margin-left: 0; /* Remove left margin to start from the very left */
+  margin-left: 0;
 }
 
 .thumbnail {
@@ -41,7 +41,7 @@
 
 .gallery-main {
   flex: 1;
-  max-width: 570px; /* Adjusted main image width */
+  max-width: 570px;
 }
 
 .main-image-container {
@@ -88,11 +88,11 @@
 
 .product-details {
   flex: 1;
-  max-width: 280px; /* Reduced width to match design */
+  max-width: 280px;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Reduced gap between elements */
-  margin-left: 20px; /* Add left margin to push details right */
+  gap: 20px;
+  margin-left: 20px;
 }
 
 .product-name {
@@ -108,7 +108,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 10px; /* Add spacing above attributes */
+  margin-top: 10px;
 }
 
 .attribute-name {
@@ -124,7 +124,7 @@
 .attribute-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px; /* Increased gap between options */
+  gap: 12px;
 }
 
 .attribute-option {
@@ -179,7 +179,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 20px; /* Add spacing above price */
+  margin-top: 20px;
 }
 
 .price-label {
@@ -215,7 +215,7 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 30px; /* Increased margin above button */
+  margin-top: 30px;
 }
 
 .add-to-cart-btn:hover:not(.disabled) {
@@ -228,7 +228,7 @@
 }
 
 .product-description {
-  margin-top: 30px; /* Reduced margin above description */
+  margin-top: 30px;
 }
 
 .description-content {

@@ -17,17 +17,16 @@ const CartOverlay = () => {
       setIsVisible(true);
       setIsClosing(false);
     } else {
-      // Closing cart - always trigger closing animation if cart was visible
       if (isVisible) {
         setIsClosing(true);
         const timer = setTimeout(() => {
           setIsVisible(false);
           setIsClosing(false);
-        }, 300); // Match animation duration
+        }, 300);
         return () => clearTimeout(timer);
       }
     }
-  }, [isCartOpen, isVisible]); // Add isVisible back to dependencies
+  }, [isCartOpen, isVisible]); 
 
   if (!isVisible) return null;
 
