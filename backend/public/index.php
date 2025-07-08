@@ -1,11 +1,9 @@
 <?php
-
-// Force display of errors for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// CORS + JSON headers must come first:
+// ─── HEADERS MUST COME FIRST ───────────────────────────────────────────────────
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -16,188 +14,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Move use statements to the top - they cannot be in try blocks
+// ─── BOOTSTRAP & ROUTING ────────────────────────────────────────────────────────
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use App\GraphQL\Types\QueryType;
 use App\GraphQL\Mutation\MutationType;
 use GraphQL\Type\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
-echo "=== Application starting ===\n";
-flush();
-
-// Debug: Show all environment variables that start with MYSQL or DB
-echo "=== ENVIRONMENT VARIABLES DEBUG ===\n";
-foreach ($_ENV as $key => $value) {
-    if (strpos($key, 'MYSQL') !== false || strpos($key, 'DB_') !== false) {
-        // Don't show full passwords, just indicate they exist
-        if (strpos($key, 'PASS') !== false || strpos($key, 'PASSWORD') !== false) {
-            echo "$key: " . (empty($value) ? 'EMPTY' : 'SET (hidden)') . "\n";
-        } else {
-            echo "$key: $value\n";
-        }
-    }
-}
-echo "=== END ENVIRONMENT VARIABLES ===\n";
-flush();
-
-try {
-    echo "Loading autoloader...\n";
-    flush();
-    require_once __DIR__ . '/../vendor/autoload.php';
-    echo "✅ Autoloader loaded successfully\n";
-    flush();
-} catch (Throwable $e) {
-    echo "❌ FATAL: Autoloader failed: " . $e->getMessage() . "\n";
-    echo "Trace: " . $e->getTraceAsString() . "\n";
-    die();
-}
-
-echo "✅ GraphQL classes imported successfully\n";
-flush();
-
-// Handle GET requests (for GraphQL introspection or browser access)
+// Handle GET introspection / health-check
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    echo "Handling GET request...\n";
-    flush();
-
-    // Test database connection
     try {
-        echo "Testing database connection...\n";
-        flush();
-
-        require_once __DIR__ . '/../src/Config/Database.php';
-        echo "✅ Database class loaded\n";
-        flush();
-
         $db = \App\Config\Database::getConnection();
-        echo "✅ Database connection successful!\n";
-        flush();
+        $count = $db->query("SELECT COUNT(*) as c FROM categories")
+            ->fetch()['c'] ?? 0;
 
-        // Test a simple query
-        $stmt = $db->query("SELECT COUNT(*) as count FROM categories");
-        $result = $stmt->fetch();
-        echo "✅ Database query successful! Categories count: " . $result['count'] . "\n";
-        flush();
-
-        header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
-            'message' => 'GraphQL endpoint is running. Send POST requests with GraphQL queries.',
-            'database' => 'connected',
-            'categories_count' => $result['count'],
-            'endpoint' => '/',
-            'example' => [
-                'query' => '{ categories { name } }',
-                'method' => 'POST',
-                'headers' => ['Content-Type: application/json']
-            ]
+            'message' => 'GraphQL endpoint is running',
+            'categories_count' => $count,
         ], JSON_PRETTY_PRINT);
 
-    } catch (Throwable $e) {
-        echo "❌ Database connection failed: " . $e->getMessage() . "\n";
-        echo "Error code: " . $e->getCode() . "\n";
-        echo "Trace: " . $e->getTraceAsString() . "\n";
-        flush();
-
-        header('Content-Type: application/json');
+    } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Database connection failed',
+            'message' => 'DB connection failed',
             'error' => $e->getMessage(),
-            'code' => $e->getCode(),
-            'trace' => $e->getTraceAsString()
         ], JSON_PRETTY_PRINT);
     }
-    exit(0);
+    exit;
 }
 
-echo "Processing POST request...\n";
-flush();
+// Handle POST GraphQL requests
+$rawInput = file_get_contents('php://input');
+$input = json_decode($rawInput, true) ?: [];
+$query = $input['query'] ?? null;
+$vars = $input['variables'] ?? null;
+
+if (!$query) {
+    http_response_code(400);
+    echo json_encode(['error' => 'No GraphQL query provided'], JSON_PRETTY_PRINT);
+    exit;
+}
 
 try {
-    echo "Creating GraphQL schema...\n";
-    flush();
-
-    // Test if QueryType can be instantiated
-    echo "Creating QueryType...\n";
-    flush();
-    $queryType = new QueryType();
-    echo "✅ QueryType created\n";
-    flush();
-
-    echo "Creating MutationType...\n";
-    flush();
-    $mutationType = new MutationType();
-    echo "✅ MutationType created\n";
-    flush();
-
-    // 1. Create the Schema (the "menu")
     $schema = new Schema([
-        'query' => $queryType,
-        'mutation' => $mutationType,
+        'query' => new QueryType(),
+        'mutation' => new MutationType(),
     ]);
+    $result = GraphQL::executeQuery($schema, $query, null, null, $vars);
+    $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE);
+    echo json_encode($output, JSON_PRETTY_PRINT);
 
-    echo "✅ Schema created successfully\n";
-    flush();
-
-    // 2. Get the incoming request
-    $rawInput = file_get_contents('php://input');
-
-    // Check if we have input data
-    if (empty($rawInput)) {
-        throw new Exception('No input data received. Please send a POST request with a GraphQL query.');
-    }
-
-    $input = json_decode($rawInput, true);
-
-    // Check if JSON decoding was successful
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception('Invalid JSON in request body: ' . json_last_error_msg());
-    }
-
-    // Check if query exists
-    if (!isset($input['query']) || empty($input['query'])) {
-        throw new Exception('No GraphQL query found in request. Please include a "query" field.');
-    }
-
-    $query = $input['query'];
-    $variableValues = $input['variables'] ?? null;
-
-    echo "Executing GraphQL query: " . substr($query, 0, 100) . "\n";
-    flush();
-
-    // 3. Execute the query
-    $result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
-    $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
-
-    echo "✅ Query executed successfully\n";
-    flush();
-
-} catch (Throwable $e) {
-    echo "❌ Error occurred: " . $e->getMessage() . "\n";
-    echo "Error code: " . $e->getCode() . "\n";
-    echo "Trace: " . $e->getTraceAsString() . "\n";
-    flush();
-
-    $output = [
-        'error' => [
-            'message' => $e->getMessage(),
-            'type' => get_class($e),
-            'code' => $e->getCode(),
-            'trace' => $e->getTraceAsString()
-        ],
-    ];
-
-    // Set appropriate HTTP status code
-    http_response_code(400);
+} catch (\Throwable $e) {
+    http_response_code(500);
+    echo json_encode([
+        'error' => $e->getMessage(),
+        'type' => get_class($e),
+        'trace' => $e->getTraceAsString(),
+    ], JSON_PRETTY_PRINT);
 }
-
-// 4. Send the response
-header('Content-Type: application/json; charset=UTF-8');
-echo json_encode($output, JSON_PRETTY_PRINT);
-
-echo "\n=== Request completed ===\n";
-flush();
 
