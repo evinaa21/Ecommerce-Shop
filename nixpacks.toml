@@ -23,6 +23,3 @@ cmds = [
 [start]
 # Define the start command for the server
 cmd = "php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf"
-
-[variables]
-PHP_VERSION = "8.3"
