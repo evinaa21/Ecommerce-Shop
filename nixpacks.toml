@@ -1,4 +1,8 @@
+# Force nixpacks provider to ensure this file is used
+providers = ["nixpacks"]
+
 [phases.setup]
+# Specify PHP 8.3 and its required extensions
 nixPkgs = [
   "php83",
   "php83Extensions.pdo",
@@ -11,11 +15,13 @@ nixPkgs = [
 ]
 
 [phases.build]
+# Define the build command
 cmds = [
   "cd backend && composer install --no-dev --optimize-autoloader"
 ]
 
 [start]
+# Define the start command for the server
 cmd = "php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf"
 
 [variables]
