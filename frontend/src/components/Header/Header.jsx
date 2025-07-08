@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
 import { useCart } from '../../context/CartContext';
 import './Header.css';
-import logo from '../../assets/icon.png'; // Import the logo
+import logo from '../../assets/icon.png';
 
 const Header = () => {
   const location = useLocation();
@@ -29,6 +29,30 @@ const Header = () => {
     }
   };
 
+  // Function to determine if a category should be active
+  const isCategoryActive = (categoryName) => {
+    // Map backend category names to frontend URLs
+    const urlMapping = {
+      'tech': 'tech',
+      'clothes': 'clothes',
+      'all': 'all'
+    };
+    
+    const urlPath = urlMapping[categoryName] || categoryName;
+    
+    // If we're on a category page, check the URL
+    if (location.pathname === `/${urlPath}`) {
+      return true;
+    }
+    
+    // If we're on a product detail page, check the currentCategory from context
+    if (location.pathname.startsWith('/product/')) {
+      return currentCategory === categoryName;
+    }
+    
+    return false;
+  };
+
   return (
     <header className="header">
       <nav className="header-nav">
@@ -43,7 +67,7 @@ const Header = () => {
           };
           
           const urlPath = urlMapping[name] || name;
-          const isActive = location.pathname === `/${urlPath}`;
+          const isActive = isCategoryActive(name);
           
           return (
             <NavLink
