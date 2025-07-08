@@ -31,8 +31,8 @@ RUN composer install --no-dev --optimize-autoloader
 # Change current user to www
 RUN chown -R www-data:www-data /var/www
 
-# Expose port 8080
+# Expose port (Railway will set PORT env var)
 EXPOSE 8080
 
-# Start the application
-CMD php -S 0.0.0.0:8080 -t public
+# Start the application using Railway's PORT environment variable
+CMD php -S 0.0.0.0:${PORT:-8080} -t public
