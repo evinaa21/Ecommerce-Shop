@@ -1,10 +1,24 @@
 providers = ["php"]
 
-[phases.build]
-cmds = ["cd backend && composer install --no-dev --optimize-autoloader"]
+[phases.setup]
+nixPkgs = [
+    'php83',
+    'php83Extensions.pdo',
+    'php83Extensions.pdo_mysql',
+    'php83Extensions.mbstring',
+    'php83Extensions.curl',
+    'php83Extensions.json',
+    'php83Packages.composer',
+    'nginx'
+]
 
-[phases.start]
-cmd = "cd backend && php -S 0.0.0.0:$PORT public/index.php"
+[phases.build]
+cmds = [
+    'cd backend && composer install --no-dev --optimize-autoloader'
+]
+
+[start]
+cmd = 'php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf'
 
 [variables]
 PHP_VERSION = "8.1"
