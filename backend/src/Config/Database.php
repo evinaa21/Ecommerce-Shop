@@ -62,41 +62,42 @@ class Database
                 }
             }
 
-            // Fallback to individual variables if MYSQL_URL failed or doesn't exist
+            // Fallback if MYSQL_URL failed or not present
             if (!$connectionEstablished) {
-                error_log("Attempting fallback connection with individual variables...");
+                error_log("Attempting fallback by parsing MYSQL_URL or using ENV vars…");
 
-                $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
-                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
-                $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
-                $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
-
-                // Extract password from MYSQL_URL if MYSQLPASSWORD is empty
-                if (empty($pass) && !empty($_ENV['MYSQL_URL'])) {
-                    error_log("Extracting password from MYSQL_URL...");
-                    $url_parts = parse_url($_ENV['MYSQL_URL']);
-                    if (isset($url_parts['pass'])) {
-                        $pass = $url_parts['pass'];
-                        error_log("✅ Password extracted from MYSQL_URL");
-                    }
+                if (!empty($_ENV['MYSQL_URL'])) {
+                    // parse full URL
+                    $parts = parse_url($_ENV['MYSQL_URL']);
+                    $host = $parts['host'] ?? 'localhost';
+                    $port = $parts['port'] ?? '3306';
+                    $user = $parts['user'] ?? ($_ENV['MYSQLUSER'] ?? 'root');
+                    $pass = $parts['pass'] ?? ($_ENV['MYSQLPASSWORD'] ?? '');
+                    $db = ltrim($parts['path'] ?? '', '/');
+                    error_log("Parsed fallback from MYSQL_URL: host=$host port=$port db=$db user=$user");
+                } else {
+                    // legacy env-var fallback
+                    $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
+                    $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
+                    $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
+                    $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
+                    $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
+                    error_log("Fallback from ENV VARS: host=$host port=$port db=$db user=$user");
                 }
 
-                error_log("Fallback details: host=$host, db=$db, user=$user, port=$port, pass=" . (empty($pass) ? 'EMPTY' : 'SET'));
-
-                $fallback_dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
-                error_log("Fallback DSN: $fallback_dsn");
+                $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
+                error_log("Fallback DSN: $dsn");
 
                 try {
-                    self::$connection = new PDO($fallback_dsn, $user, $pass);
+                    self::$connection = new PDO($dsn, $user, $pass);
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                    error_log("✅ Database connected successfully with fallback");
+                    error_log("✅ Database connected successfully via fallback");
                     $connectionEstablished = true;
-                } catch (PDOException $fallback_e) {
-                    error_log("❌ Fallback connection failed: " . $fallback_e->getMessage());
-                    error_log("Fallback error code: " . $fallback_e->getCode());
-                    throw new PDOException("Database connection failed: " . $fallback_e->getMessage());
+                } catch (PDOException $e) {
+                    error_log("❌ Fallback connection failed: " . $e->getMessage());
+                    error_log("Fallback error code: " . $e->getCode());
+                    throw new PDOException("Database connection failed: " . $e->getMessage());
                 }
             }
 
