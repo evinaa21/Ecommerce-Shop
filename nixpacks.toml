@@ -2,15 +2,10 @@
 providers = ["nixpacks"]
 
 [phases.setup]
-# Specify PHP 8.3 and its required extensions
+# Minimal package list - let Nixpacks auto-detect PHP needs
 nixPkgs = [
-  "php83",
-  "php83Extensions.pdo",
-  "php83Extensions.pdo_mysql",
-  "php83Extensions.mbstring",
-  "php83Extensions.curl",
-  "php83Extensions.json",
-  "php83Packages.composer",
+  "php",
+  "composer", 
   "nginx"
 ]
 
