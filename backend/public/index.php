@@ -12,23 +12,19 @@ use GraphQL\Type\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
-echo "=== Application starting ===\n";
-flush();
+error_log("=== Application starting ===");
 
 try {
-    echo "Loading autoloader...\n";
-    flush();
+    error_log("Loading autoloader...");
     require_once __DIR__ . '/../vendor/autoload.php';
-    echo "✅ Autoloader loaded successfully\n";
-    flush();
+    error_log("✅ Autoloader loaded successfully");
 } catch (Throwable $e) {
-    echo "❌ FATAL: Autoloader failed: " . $e->getMessage() . "\n";
-    echo "Trace: " . $e->getTraceAsString() . "\n";
-    die();
+    error_log("❌ FATAL: Autoloader failed: " . $e->getMessage());
+    error_log("Trace: " . $e->getTraceAsString());
+    die("Autoloader failed");
 }
 
-echo "✅ GraphQL classes imported successfully\n";
-flush();
+error_log("✅ GraphQL classes imported successfully");
 
 // Allow cross-origin requests (for development)
 header('Access-Control-Allow-Origin: *');
@@ -41,27 +37,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Handle GET requests (for GraphQL introspection or browser access)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    echo "Handling GET request...\n";
-    flush();
+    error_log("Handling GET request...");
 
     // Test database connection
     try {
-        echo "Testing database connection...\n";
-        flush();
+        error_log("Testing database connection...");
 
         require_once __DIR__ . '/../src/Config/Database.php';
-        echo "✅ Database class loaded\n";
-        flush();
+        error_log("✅ Database class loaded");
 
         $db = \App\Config\Database::getConnection();
-        echo "✅ Database connection successful!\n";
-        flush();
+        error_log("✅ Database connection successful!");
 
         // Test a simple query
         $stmt = $db->query("SELECT COUNT(*) as count FROM categories");
         $result = $stmt->fetch();
-        echo "✅ Database query successful! Categories count: " . $result['count'] . "\n";
-        flush();
+        error_log("✅ Database query successful! Categories count: " . $result['count']);
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -78,10 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ], JSON_PRETTY_PRINT);
 
     } catch (Throwable $e) {
-        echo "❌ Database connection failed: " . $e->getMessage() . "\n";
-        echo "Error code: " . $e->getCode() . "\n";
-        echo "Trace: " . $e->getTraceAsString() . "\n";
-        flush();
+        error_log("❌ Database connection failed: " . $e->getMessage());
+        error_log("Error code: " . $e->getCode());
+        error_log("Error trace: " . $e->getTraceAsString());
 
         header('Content-Type: application/json');
         http_response_code(500);
@@ -96,25 +86,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit(0);
 }
 
-echo "Processing POST request...\n";
-flush();
+error_log("Processing POST request...");
 
 try {
-    echo "Creating GraphQL schema...\n";
-    flush();
+    error_log("Creating GraphQL schema...");
 
     // Test if QueryType can be instantiated
-    echo "Creating QueryType...\n";
-    flush();
+    error_log("Creating QueryType...");
     $queryType = new QueryType();
-    echo "✅ QueryType created\n";
-    flush();
+    error_log("✅ QueryType created");
 
-    echo "Creating MutationType...\n";
-    flush();
+    error_log("Creating MutationType...");
     $mutationType = new MutationType();
-    echo "✅ MutationType created\n";
-    flush();
+    error_log("✅ MutationType created");
 
     // 1. Create the Schema (the "menu")
     $schema = new Schema([
@@ -122,8 +106,7 @@ try {
         'mutation' => $mutationType,
     ]);
 
-    echo "✅ Schema created successfully\n";
-    flush();
+    error_log("✅ Schema created successfully");
 
     // 2. Get the incoming request
     $rawInput = file_get_contents('php://input');
@@ -148,21 +131,18 @@ try {
     $query = $input['query'];
     $variableValues = $input['variables'] ?? null;
 
-    echo "Executing GraphQL query: " . substr($query, 0, 100) . "\n";
-    flush();
+    error_log("Executing GraphQL query: " . substr($query, 0, 100));
 
     // 3. Execute the query
     $result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
     $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
 
-    echo "✅ Query executed successfully\n";
-    flush();
+    error_log("✅ Query executed successfully");
 
 } catch (Throwable $e) {
-    echo "❌ Error occurred: " . $e->getMessage() . "\n";
-    echo "Error code: " . $e->getCode() . "\n";
-    echo "Trace: " . $e->getTraceAsString() . "\n";
-    flush();
+    error_log("❌ Error occurred: " . $e->getMessage());
+    error_log("Error code: " . $e->getCode());
+    error_log("Error trace: " . $e->getTraceAsString());
 
     $output = [
         'error' => [
@@ -181,6 +161,5 @@ try {
 header('Content-Type: application/json; charset=UTF-8');
 echo json_encode($output, JSON_PRETTY_PRINT);
 
-echo "\n=== Request completed ===\n";
-flush();
+error_log("=== Request completed ===");
 
