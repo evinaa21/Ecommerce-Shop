@@ -24,10 +24,16 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            // Only load .env file if it exists (for local development)
-            if (file_exists(__DIR__ . '/../../.env')) {
+            // Only load .env file for local development (not on Railway)
+            if (file_exists(__DIR__ . '/../../.env') && !isset($_ENV['RAILWAY_ENVIRONMENT'])) {
                 $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
                 $dotenv->load();
+            }
+
+            // Debug: Log what we have available
+            error_log("MYSQL_URL exists: " . (isset($_ENV['MYSQL_URL']) ? 'YES' : 'NO'));
+            if (isset($_ENV['MYSQL_URL'])) {
+                error_log("MYSQL_URL starts with: " . substr($_ENV['MYSQL_URL'], 0, 10));
             }
 
             // Check if Railway provides MYSQL_URL (single connection string)
@@ -38,31 +44,31 @@ class Database
                     self::$connection = new PDO($dsn);
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                    error_log("Database connected successfully with MYSQL_URL");
                 } catch (PDOException $e) {
                     error_log("Database connection failed with MYSQL_URL: " . $e->getMessage());
-                    die("Database connection failed: " . $e->getMessage());
+                    throw new PDOException("Database connection failed: " . $e->getMessage());
                 }
             } else {
-                // Fallback to individual environment variables
-                $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
-                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
-                $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
-                $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
+                // This should not happen on Railway if MYSQL_URL is set
+                error_log("MYSQL_URL not available, attempting individual variables");
+
+                $host = $_ENV['MYSQLHOST'] ?? 'localhost';
+                $db = $_ENV['MYSQLDATABASE'] ?? 'railway';
+                $user = $_ENV['MYSQLUSER'] ?? 'root';
+                $pass = $_ENV['MYSQLPASSWORD'] ?? '';
+                $port = $_ENV['MYSQLPORT'] ?? '3306';
 
                 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
-
                 try {
                     self::$connection = new PDO($dsn, $user, $pass);
-
-                    // Set a few options to make PDO easier to work with
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
+                    error_log("Database connected successfully with individual vars");
                 } catch (PDOException $e) {
                     error_log("Database connection failed with individual vars: " . $e->getMessage());
-                    die("Database connection failed: " . $e->getMessage());
+                    throw new PDOException("Database connection failed: " . $e->getMessage());
                 }
             }
         }
