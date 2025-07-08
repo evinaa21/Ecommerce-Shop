@@ -12,20 +12,32 @@ class Database
 
     public static function getConnection(): PDO
     {
+        error_log("=== Database::getConnection() called ===");
+
         if (self::$connection === null) {
+            error_log("Creating new database connection...");
+
             // Load .env file only for local development
             if (file_exists(__DIR__ . '/../../.env') && !isset($_ENV['MYSQL_URL'])) {
+                error_log("Loading .env file for local development");
                 try {
                     $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
                     $dotenv->load();
+                    error_log(".env file loaded successfully");
                 } catch (Exception $e) {
                     error_log("Could not load .env file: " . $e->getMessage());
                 }
+            } else {
+                error_log("Skipping .env file - using Railway environment variables");
             }
 
             // Debug logging
             error_log("MYSQL_URL exists: " . (isset($_ENV['MYSQL_URL']) ? 'YES' : 'NO'));
             error_log("MYSQLHOST exists: " . (isset($_ENV['MYSQLHOST']) ? 'YES' : 'NO'));
+
+            if (isset($_ENV['MYSQL_URL'])) {
+                error_log("MYSQL_URL value: " . substr($_ENV['MYSQL_URL'], 0, 20) . "...");
+            }
 
             // Try MYSQL_URL first (Railway's preferred method)
             if (!empty($_ENV['MYSQL_URL'])) {
@@ -33,12 +45,14 @@ class Database
                 error_log("Using MYSQL_URL connection");
 
                 try {
+                    error_log("Attempting PDO connection with MYSQL_URL...");
                     self::$connection = new PDO($dsn);
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                     error_log("Database connected successfully with MYSQL_URL");
                 } catch (PDOException $e) {
                     error_log("Database connection failed with MYSQL_URL: " . $e->getMessage());
+                    error_log("PDO Error Code: " . $e->getCode());
                     throw new PDOException("Database connection failed: " . $e->getMessage());
                 }
             } else {
@@ -56,17 +70,22 @@ class Database
                 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
                 try {
+                    error_log("Attempting PDO connection with individual variables...");
                     self::$connection = new PDO($dsn, $user, $pass);
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                     error_log("Database connected successfully with individual vars");
                 } catch (PDOException $e) {
                     error_log("Database connection failed with individual vars: " . $e->getMessage());
+                    error_log("PDO Error Code: " . $e->getCode());
                     throw new PDOException("Database connection failed: " . $e->getMessage());
                 }
             }
+        } else {
+            error_log("Using existing database connection");
         }
 
+        error_log("=== Database connection established ===");
         return self::$connection;
     }
 }
