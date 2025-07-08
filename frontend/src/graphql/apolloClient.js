@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 const httpLink = new HttpLink({
-  uri: 'https://ecommerce-shop-production-782b.up.railway.app/backend/public/', // Your Railway URL
+  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', // Updated Railway URL
 });
 
 const client = new ApolloClient({
