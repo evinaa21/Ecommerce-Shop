@@ -24,16 +24,20 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            // Load the database credentials from the .env file
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-            $dotenv->load();
+            // Load environment variables
+            if (file_exists(__DIR__ . '/../../.env')) {
+                $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+                $dotenv->load();
+            }
 
-            $host = $_ENV['DB_HOST'];
-            $db   = $_ENV['DB_NAME'];
-            $user = $_ENV['DB_USER'];
-            $pass = $_ENV['DB_PASS'];
+            // Railway provides these environment variables automatically
+            $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
+            $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? '';
+            $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? '';
+            $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
+            $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
 
-            $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
 
             try {

@@ -81,3 +81,4 @@ try {
 // 4. Send the response
 header('Content-Type: application/json; charset=UTF-8');
 echo json_encode($output, JSON_PRETTY_PRINT);
+
