@@ -15,6 +15,21 @@ use GraphQL\Error\DebugFlag;
 echo "=== Application starting ===\n";
 flush();
 
+// Debug: Show all environment variables that start with MYSQL or DB
+echo "=== ENVIRONMENT VARIABLES DEBUG ===\n";
+foreach ($_ENV as $key => $value) {
+    if (strpos($key, 'MYSQL') !== false || strpos($key, 'DB_') !== false) {
+        // Don't show full passwords, just indicate they exist
+        if (strpos($key, 'PASS') !== false || strpos($key, 'PASSWORD') !== false) {
+            echo "$key: " . (empty($value) ? 'EMPTY' : 'SET (hidden)') . "\n";
+        } else {
+            echo "$key: $value\n";
+        }
+    }
+}
+echo "=== END ENVIRONMENT VARIABLES ===\n";
+flush();
+
 try {
     echo "Loading autoloader...\n";
     flush();
