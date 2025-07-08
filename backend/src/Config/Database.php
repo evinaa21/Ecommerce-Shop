@@ -13,23 +13,21 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            // Load .env file only if we're in local development
-            // Railway provides environment variables directly, no .env file needed
+            // Load .env file only for local development
             if (file_exists(__DIR__ . '/../../.env') && !isset($_ENV['MYSQL_URL'])) {
                 try {
                     $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
                     $dotenv->load();
                 } catch (Exception $e) {
-                    // Ignore .env loading errors on Railway
                     error_log("Could not load .env file: " . $e->getMessage());
                 }
             }
 
-            // Debug: Log available environment variables
+            // Debug logging
             error_log("MYSQL_URL exists: " . (isset($_ENV['MYSQL_URL']) ? 'YES' : 'NO'));
             error_log("MYSQLHOST exists: " . (isset($_ENV['MYSQLHOST']) ? 'YES' : 'NO'));
 
-            // Railway provides MYSQL_URL - use it first
+            // Try MYSQL_URL first (Railway's preferred method)
             if (!empty($_ENV['MYSQL_URL'])) {
                 $dsn = $_ENV['MYSQL_URL'];
                 error_log("Using MYSQL_URL connection");
