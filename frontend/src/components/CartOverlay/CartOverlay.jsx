@@ -58,12 +58,12 @@ const CartOverlay = () => {
         } 
       });
       
-      if (data.placeOrder.success) {
-        alert(data.placeOrder.message);
+      if (data.createOrder.success) {
+        alert(data.createOrder.message);
         clearCart();
         setIsCartOpen(false);
       } else {
-        alert(`Error: ${data.placeOrder.message}`);
+        alert(`Error: ${data.createOrder.message}`);
       }
     } catch (e) {
       console.error('Error placing order:', e);
