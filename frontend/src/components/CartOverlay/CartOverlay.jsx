@@ -81,6 +81,7 @@ const CartOverlay = () => {
   return (
     <div 
       className={`cart-overlay-backdrop ${isClosing ? 'closing' : ''}`}
+      data-testid="cart-overlay"
       onClick={handleBackdropClick}
     >
       <div 
