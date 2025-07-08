@@ -39,7 +39,7 @@ class Database
                 error_log("MYSQL_URL value: " . substr($_ENV['MYSQL_URL'], 0, 30) . "...");
             }
 
-            // Try MYSQL_URL first (Railway's preferred method) - and it has the password!
+            // Try MYSQL_URL first (Railway's preferred method)
             if (!empty($_ENV['MYSQL_URL'])) {
                 $dsn = $_ENV['MYSQL_URL'];
                 error_log("Using MYSQL_URL connection: " . $dsn);
@@ -50,59 +50,48 @@ class Database
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                     error_log("Database connected successfully with MYSQL_URL");
+                    return self::$connection; // Return early on success
                 } catch (PDOException $e) {
                     error_log("Database connection failed with MYSQL_URL: " . $e->getMessage());
                     error_log("PDO Error Code: " . $e->getCode());
-
-                    // Fall back to individual variables if MYSQL_URL fails
-                    error_log("Falling back to individual environment variables...");
-
-                    $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-                    $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
-                    $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
-                    $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
-                    $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
-
-                    error_log("Fallback connection details: host=$host, db=$db, user=$user, port=$port, pass=" . (empty($pass) ? 'EMPTY' : 'SET'));
-
-                    $fallback_dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
-
-                    try {
-                        error_log("Attempting PDO connection with fallback variables...");
-                        self::$connection = new PDO($fallback_dsn, $user, $pass);
-                        self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                        self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                        error_log("Database connected successfully with fallback vars");
-                    } catch (PDOException $fallback_e) {
-                        error_log("Database connection failed with fallback vars: " . $fallback_e->getMessage());
-                        throw new PDOException("Database connection failed: " . $fallback_e->getMessage());
-                    }
+                    error_log("Will try fallback method...");
+                    // Don't throw here, continue to fallback
                 }
-            } else {
-                // This shouldn't happen since we see MYSQL_URL is set
-                error_log("MYSQL_URL not available, using individual variables");
+            }
 
-                $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
-                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
-                $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
-                $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
+            // Fallback to individual variables (either MYSQL_URL failed or doesn't exist)
+            error_log("Using fallback: individual environment variables...");
 
-                error_log("Connection details: host=$host, db=$db, user=$user, port=$port, pass=" . (empty($pass) ? 'EMPTY' : 'SET'));
+            $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
+            $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
+            $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
+            $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
+            $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
 
-                $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
-
-                try {
-                    error_log("Attempting PDO connection with individual variables...");
-                    self::$connection = new PDO($dsn, $user, $pass);
-                    self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                    error_log("Database connected successfully with individual vars");
-                } catch (PDOException $e) {
-                    error_log("Database connection failed with individual vars: " . $e->getMessage());
-                    error_log("PDO Error Code: " . $e->getCode());
-                    throw new PDOException("Database connection failed: " . $e->getMessage());
+            // Extract password from MYSQL_URL if MYSQLPASSWORD is empty
+            if (empty($pass) && !empty($_ENV['MYSQL_URL'])) {
+                error_log("MYSQLPASSWORD is empty, extracting from MYSQL_URL...");
+                $url_parts = parse_url($_ENV['MYSQL_URL']);
+                if (isset($url_parts['pass'])) {
+                    $pass = $url_parts['pass'];
+                    error_log("Extracted password from MYSQL_URL");
                 }
+            }
+
+            error_log("Fallback connection details: host=$host, db=$db, user=$user, port=$port, pass=" . (empty($pass) ? 'EMPTY' : 'SET'));
+
+            $fallback_dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+
+            try {
+                error_log("Attempting PDO connection with fallback variables...");
+                self::$connection = new PDO($fallback_dsn, $user, $pass);
+                self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                error_log("Database connected successfully with fallback vars");
+            } catch (PDOException $fallback_e) {
+                error_log("Database connection failed with fallback vars: " . $fallback_e->getMessage());
+                error_log("PDO Error Code: " . $fallback_e->getCode());
+                throw new PDOException("Database connection failed: " . $fallback_e->getMessage());
             }
         } else {
             error_log("Using existing database connection");
