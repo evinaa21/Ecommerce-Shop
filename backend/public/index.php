@@ -5,6 +5,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// CORS + JSON headers must come first:
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Content-Type: application/json; charset=UTF-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 // Move use statements to the top - they cannot be in try blocks
 use App\GraphQL\Types\QueryType;
 use App\GraphQL\Mutation\MutationType;
@@ -44,15 +55,6 @@ try {
 
 echo "✅ GraphQL classes imported successfully\n";
 flush();
-
-// Allow cross-origin requests (for development)
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
 
 // Handle GET requests (for GraphQL introspection or browser access)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
