@@ -30,27 +30,40 @@ class Database
                 $dotenv->load();
             }
 
-            // Railway provides these environment variables automatically
-            $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-            $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? '';
-            $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? '';
-            $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
-            $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
+            // Check if Railway provides MYSQL_URL (single connection string)
+            if (!empty($_ENV['MYSQL_URL'])) {
+                $dsn = $_ENV['MYSQL_URL'];
 
-            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+                try {
+                    self::$connection = new PDO($dsn);
+                    self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                } catch (PDOException $e) {
+                    die("Database connection failed: " . $e->getMessage());
+                }
+            } else {
+                // Fallback to individual environment variables
+                $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
+                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? '';
+                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? '';
+                $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
+                $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
+
+                $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
 
-            try {
-                // Create the one-time database connection
-                self::$connection = new PDO($dsn, $user, $pass);
+                try {
+                    // Create the one-time database connection
+                    self::$connection = new PDO($dsn, $user, $pass);
 
-                // Set a few options to make PDO easier to work with
-                self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                    // Set a few options to make PDO easier to work with
+                    self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-            } catch (PDOException $e) {
-                // If connection fails, stop the application and show the error
-                die("Database connection failed: " . $e->getMessage());
+                } catch (PDOException $e) {
+                    // If connection fails, stop the application and show the error
+                    die("Database connection failed: " . $e->getMessage());
+                }
             }
         }
 
