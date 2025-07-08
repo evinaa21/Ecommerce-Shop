@@ -5,15 +5,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Custom logging function that outputs to both error log and stdout
-function debug_log($message)
-{
-    error_log($message);
-    // Also output to stdout so Railway can see it
-    fwrite(STDOUT, "[DEBUG] " . $message . "\n");
-    flush();
-}
-
 // Move use statements to the top - they cannot be in try blocks
 use App\GraphQL\Types\QueryType;
 use App\GraphQL\Mutation\MutationType;
@@ -21,19 +12,23 @@ use GraphQL\Type\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
-debug_log("=== Application starting ===");
+echo "=== Application starting ===\n";
+flush();
 
 try {
-    debug_log("Loading autoloader...");
+    echo "Loading autoloader...\n";
+    flush();
     require_once __DIR__ . '/../vendor/autoload.php';
-    debug_log("✅ Autoloader loaded successfully");
+    echo "✅ Autoloader loaded successfully\n";
+    flush();
 } catch (Throwable $e) {
-    debug_log("❌ FATAL: Autoloader failed: " . $e->getMessage());
-    debug_log("Trace: " . $e->getTraceAsString());
-    die("Autoloader failed");
+    echo "❌ FATAL: Autoloader failed: " . $e->getMessage() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
+    die();
 }
 
-debug_log("✅ GraphQL classes imported successfully");
+echo "✅ GraphQL classes imported successfully\n";
+flush();
 
 // Allow cross-origin requests (for development)
 header('Access-Control-Allow-Origin: *');
@@ -46,22 +41,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Handle GET requests (for GraphQL introspection or browser access)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    debug_log("Handling GET request...");
+    echo "Handling GET request...\n";
+    flush();
 
     // Test database connection
     try {
-        debug_log("Testing database connection...");
+        echo "Testing database connection...\n";
+        flush();
 
         require_once __DIR__ . '/../src/Config/Database.php';
-        debug_log("✅ Database class loaded");
+        echo "✅ Database class loaded\n";
+        flush();
 
         $db = \App\Config\Database::getConnection();
-        debug_log("✅ Database connection successful!");
+        echo "✅ Database connection successful!\n";
+        flush();
 
         // Test a simple query
         $stmt = $db->query("SELECT COUNT(*) as count FROM categories");
         $result = $stmt->fetch();
-        debug_log("✅ Database query successful! Categories count: " . $result['count']);
+        echo "✅ Database query successful! Categories count: " . $result['count'] . "\n";
+        flush();
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -70,12 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'database' => 'connected',
             'categories_count' => $result['count'],
             'endpoint' => '/',
-            'debug_info' => [
-                'server_started' => true,
-                'autoloader' => 'loaded',
-                'database' => 'connected',
-                'categories_found' => $result['count']
-            ],
             'example' => [
                 'query' => '{ categories { name } }',
                 'method' => 'POST',
@@ -84,9 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ], JSON_PRETTY_PRINT);
 
     } catch (Throwable $e) {
-        debug_log("❌ Database connection failed: " . $e->getMessage());
-        debug_log("Error code: " . $e->getCode());
-        debug_log("Error trace: " . $e->getTraceAsString());
+        echo "❌ Database connection failed: " . $e->getMessage() . "\n";
+        echo "Error code: " . $e->getCode() . "\n";
+        echo "Trace: " . $e->getTraceAsString() . "\n";
+        flush();
 
         header('Content-Type: application/json');
         http_response_code(500);
@@ -95,31 +90,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'message' => 'Database connection failed',
             'error' => $e->getMessage(),
             'code' => $e->getCode(),
-            'debug_info' => [
-                'server_started' => true,
-                'autoloader' => 'loaded',
-                'database' => 'failed',
-                'error_details' => $e->getMessage()
-            ],
             'trace' => $e->getTraceAsString()
         ], JSON_PRETTY_PRINT);
     }
     exit(0);
 }
 
-debug_log("Processing POST request...");
+echo "Processing POST request...\n";
+flush();
 
 try {
-    debug_log("Creating GraphQL schema...");
+    echo "Creating GraphQL schema...\n";
+    flush();
 
     // Test if QueryType can be instantiated
-    debug_log("Creating QueryType...");
+    echo "Creating QueryType...\n";
+    flush();
     $queryType = new QueryType();
-    debug_log("✅ QueryType created");
+    echo "✅ QueryType created\n";
+    flush();
 
-    debug_log("Creating MutationType...");
+    echo "Creating MutationType...\n";
+    flush();
     $mutationType = new MutationType();
-    debug_log("✅ MutationType created");
+    echo "✅ MutationType created\n";
+    flush();
 
     // 1. Create the Schema (the "menu")
     $schema = new Schema([
@@ -127,7 +122,8 @@ try {
         'mutation' => $mutationType,
     ]);
 
-    debug_log("✅ Schema created successfully");
+    echo "✅ Schema created successfully\n";
+    flush();
 
     // 2. Get the incoming request
     $rawInput = file_get_contents('php://input');
@@ -152,18 +148,21 @@ try {
     $query = $input['query'];
     $variableValues = $input['variables'] ?? null;
 
-    debug_log("Executing GraphQL query: " . substr($query, 0, 100));
+    echo "Executing GraphQL query: " . substr($query, 0, 100) . "\n";
+    flush();
 
     // 3. Execute the query
     $result = GraphQL::executeQuery($schema, $query, null, null, $variableValues);
     $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
 
-    debug_log("✅ Query executed successfully");
+    echo "✅ Query executed successfully\n";
+    flush();
 
 } catch (Throwable $e) {
-    debug_log("❌ Error occurred: " . $e->getMessage());
-    debug_log("Error code: " . $e->getCode());
-    debug_log("Error trace: " . $e->getTraceAsString());
+    echo "❌ Error occurred: " . $e->getMessage() . "\n";
+    echo "Error code: " . $e->getCode() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
+    flush();
 
     $output = [
         'error' => [
@@ -182,5 +181,6 @@ try {
 header('Content-Type: application/json; charset=UTF-8');
 echo json_encode($output, JSON_PRETTY_PRINT);
 
-debug_log("=== Request completed ===");
+echo "\n=== Request completed ===\n";
+flush();
 
