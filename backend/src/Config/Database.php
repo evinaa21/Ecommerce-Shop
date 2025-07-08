@@ -24,7 +24,7 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            // Load environment variables
+            // Only load .env file if it exists (for local development)
             if (file_exists(__DIR__ . '/../../.env')) {
                 $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
                 $dotenv->load();
@@ -39,13 +39,14 @@ class Database
                     self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                 } catch (PDOException $e) {
+                    error_log("Database connection failed with MYSQL_URL: " . $e->getMessage());
                     die("Database connection failed: " . $e->getMessage());
                 }
             } else {
                 // Fallback to individual environment variables
                 $host = $_ENV['MYSQLHOST'] ?? $_ENV['DB_HOST'] ?? 'localhost';
-                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? '';
-                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? '';
+                $db = $_ENV['MYSQLDATABASE'] ?? $_ENV['DB_NAME'] ?? 'railway';
+                $user = $_ENV['MYSQLUSER'] ?? $_ENV['DB_USER'] ?? 'root';
                 $pass = $_ENV['MYSQLPASSWORD'] ?? $_ENV['DB_PASS'] ?? '';
                 $port = $_ENV['MYSQLPORT'] ?? $_ENV['DB_PORT'] ?? '3306';
 
@@ -53,7 +54,6 @@ class Database
 
 
                 try {
-                    // Create the one-time database connection
                     self::$connection = new PDO($dsn, $user, $pass);
 
                     // Set a few options to make PDO easier to work with
@@ -61,7 +61,7 @@ class Database
                     self::$connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
                 } catch (PDOException $e) {
-                    // If connection fails, stop the application and show the error
+                    error_log("Database connection failed with individual vars: " . $e->getMessage());
                     die("Database connection failed: " . $e->getMessage());
                 }
             }
