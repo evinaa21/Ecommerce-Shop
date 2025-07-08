@@ -159,9 +159,11 @@ const ProductPage = () => {
               <div className="attribute-options">
                 {attr.items.map((option) => {
                   const isSelected = selectedAttributes[attr.id] === option.value;
+                  const testId = `product-attribute-${kebabCase(attr.name)}-${option.value}`;
                   return (
                     <button
                       key={option.value}
+                      data-testid={testId}
                       onClick={() => handleAttributeSelect(attr.id, option.value)}
                       className={`
                         attribute-option
