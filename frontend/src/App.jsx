@@ -1,5 +1,5 @@
-import React from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header/Header';
 import CategoryPage from './pages/CategoryPage/CategoryPage';
 import ProductPage from './pages/ProductPage/ProductPage';
@@ -10,6 +10,21 @@ import './App.css';
 
 function App() {
   const { successMessage } = useCart();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/all') {
+      document.title = 'All Products | Ecommerce Shop';
+    } else if (location.pathname === '/clothes') {
+      document.title = 'Clothes | Ecommerce Shop';
+    } else if (location.pathname === '/tech') {
+      document.title = 'Tech | Ecommerce Shop';
+    } else if (location.pathname.startsWith('/product/')) {
+      document.title = 'Product Details | Ecommerce Shop';
+    } else {
+      document.title = 'Ecommerce Shop';
+    }
+  }, [location.pathname]);
 
   return (
     <div className="app">
