@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './SuccessMessage.css';
 
-const SuccessMessage = ({ messages, removeMessage }) => {
+const SuccessMessage = ({ messages = [], removeMessage }) => {
   if (!messages.length) return null;
 
   return (
