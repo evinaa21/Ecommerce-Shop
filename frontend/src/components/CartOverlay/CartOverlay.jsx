@@ -3,17 +3,21 @@ import { useCart } from '../../context/CartContext';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER } from '../../graphql/mutations';
 import CartItem from '../CartItem/CartItem.jsx';
+import SuccessMessage from '../SuccessMessage/SuccessMessage';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, clearCart, showSuccessMessage } = useCart();
-  const [placeOrder, { loading, error }] = useMutation(PLACE_ORDER);
+  const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
+  const [placeOrder, { loading }] = useMutation(PLACE_ORDER);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  // State for success/error messages
+  const [orderMessage, setOrderMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+
   useEffect(() => {
     if (isCartOpen) {
-      // Opening cart
       setIsVisible(true);
       setIsClosing(false);
     } else {
@@ -22,11 +26,14 @@ const CartOverlay = () => {
         const timer = setTimeout(() => {
           setIsVisible(false);
           setIsClosing(false);
+          // Clear message when cart closes
+          setOrderMessage('');
+          setIsError(false);
         }, 300);
         return () => clearTimeout(timer);
       }
     }
-  }, [isCartOpen, isVisible]); 
+  }, [isCartOpen, isVisible]);
 
   if (!isVisible) return null;
 
@@ -51,23 +58,26 @@ const CartOverlay = () => {
     }));
 
     try {
-      const { data } = await placeOrder({ 
-        variables: { 
+      const { data } = await placeOrder({
+        variables: {
           products: products,
           total: parseFloat(totalPrice.toFixed(2))
-        } 
+        }
       });
-      
+
       if (data.createOrder.success) {
-        showSuccessMessage(data.createOrder.message);
+        setOrderMessage(data.createOrder.message);
+        setIsError(false);
         clearCart();
         setIsCartOpen(false);
       } else {
-        showSuccessMessage(`Error: ${data.createOrder.message}`);
+        setOrderMessage(`Error: ${data.createOrder.message}`);
+        setIsError(true);
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      alert(`Error placing order: ${e.message}`);
+      setOrderMessage(`Error placing order: ${e.message}`);
+      setIsError(true);
     }
   };
 
@@ -78,12 +88,12 @@ const CartOverlay = () => {
   };
 
   return (
-    <div 
+    <div
       className={`cart-overlay-backdrop ${isClosing ? 'closing' : ''}`}
       data-testid="cart-overlay"
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className={`cart-overlay-container ${isClosing ? 'closing' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -101,6 +111,7 @@ const CartOverlay = () => {
             <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
           </div>
           <div className="cart-actions">
+            {orderMessage && <SuccessMessage message={orderMessage} isError={isError} />}
             <button
               className="place-order-btn"
               onClick={handlePlaceOrder}
