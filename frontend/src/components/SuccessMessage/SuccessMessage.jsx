@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './SuccessMessage.css';
 
-const SuccessMessage = ({ message, isError }) => {
-  if (!message) return null;
+const SuccessMessage = ({ messages, removeMessage }) => {
+  if (!messages.length) return null;
 
   return (
     <div className="success-message-container">
-      <div className={`success-message ${isError ? 'error' : 'success'}`}>
-        {message}
-      </div>
+      {messages.map(({ id, text, type }) => (
+        <div
+          key={id}
+          className={`success-message ${type}`}
+          onAnimationEnd={() => removeMessage(id)}
+        >
+          {text}
+        </div>
+      ))}
     </div>
   );
 };
