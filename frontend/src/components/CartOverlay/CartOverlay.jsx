@@ -6,7 +6,7 @@ import CartItem from '../CartItem/CartItem.jsx';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
+  const { cartItems, isCartOpen, setIsCartOpen, clearCart, showSuccessMessage } = useCart();
   const [placeOrder, { loading, error }] = useMutation(PLACE_ORDER);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -59,11 +59,11 @@ const CartOverlay = () => {
       });
       
       if (data.createOrder.success) {
-        alert(data.createOrder.message);
+        showSuccessMessage(data.createOrder.message);
         clearCart();
         setIsCartOpen(false);
       } else {
-        alert(`Error: ${data.createOrder.message}`);
+        showSuccessMessage(`Error: ${data.createOrder.message}`);
       }
     } catch (e) {
       console.error('Error placing order:', e);
