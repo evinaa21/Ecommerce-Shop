@@ -7,12 +7,10 @@ import SuccessMessage from '../SuccessMessage/SuccessMessage';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
+  const { cartItems, isCartOpen, setIsCartOpen, clearCart, successMessage, showSuccessMessage } = useCart();
   const [placeOrder, { loading }] = useMutation(PLACE_ORDER);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-
-  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     if (isCartOpen) {
@@ -29,16 +27,6 @@ const CartOverlay = () => {
       }
     }
   }, [isCartOpen, isVisible]);
-
-  const addMessage = (text, type = 'success') => {
-    const id = Date.now() + Math.random();
-    setMessages((prev) => [...prev, { id, text, type }]);
-    setTimeout(() => removeMessage(id), 5000);
-  };
-
-  const removeMessage = (id) => {
-    setMessages((prev) => prev.filter((msg) => msg.id !== id));
-  };
 
   if (!isVisible) return null;
 
@@ -71,15 +59,15 @@ const CartOverlay = () => {
       });
 
       if (data.createOrder.success) {
-        addMessage(data.createOrder.message, 'success');
+        showSuccessMessage(data.createOrder.message);
         clearCart();
         setIsCartOpen(false);
       } else {
-        addMessage(`Error: ${data.createOrder.message}`, 'error');
+        showSuccessMessage(`Error: ${data.createOrder.message}`);
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      addMessage(`Error placing order: ${e.message}`, 'error');
+      showSuccessMessage(`Error placing order: ${e.message}`);
     }
   };
 
@@ -126,7 +114,7 @@ const CartOverlay = () => {
         </div>
       </div>
 
-      <SuccessMessage messages={messages} removeMessage={removeMessage} />
+      <SuccessMessage message={successMessage} />
     </>
   );
 };
