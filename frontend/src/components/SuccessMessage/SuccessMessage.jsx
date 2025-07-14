@@ -5,8 +5,10 @@ const SuccessMessage = ({ message, isError }) => {
   if (!message) return null;
 
   return (
-    <div className={`message-container ${isError ? 'error' : 'success'}`}>
-      {message}
+    <div className="success-message-container">
+      <div className={`success-message ${isError ? 'error' : 'success'}`}>
+        {message}
+      </div>
     </div>
   );
 };

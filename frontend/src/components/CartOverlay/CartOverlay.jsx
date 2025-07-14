@@ -7,7 +7,7 @@ import SuccessMessage from '../SuccessMessage/SuccessMessage';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
+  const { cartItems, isCartOpen, setIsCartOpen, clearCart, successMessage } = useCart();
   const [placeOrder, { loading }] = useMutation(PLACE_ORDER);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -66,18 +66,16 @@ const CartOverlay = () => {
       });
 
       if (data.createOrder.success) {
-        setOrderMessage(data.createOrder.message);
-        setIsError(false);
+        // Use showSuccessMessage from context
+        showSuccessMessage(data.createOrder.message);
         clearCart();
         setIsCartOpen(false);
       } else {
-        setOrderMessage(`Error: ${data.createOrder.message}`);
-        setIsError(true);
+        showSuccessMessage(`Error: ${data.createOrder.message}`);
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      setOrderMessage(`Error placing order: ${e.message}`);
-      setIsError(true);
+      showSuccessMessage(`Error placing order: ${e.message}`);
     }
   };
 
@@ -111,7 +109,7 @@ const CartOverlay = () => {
             <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
           </div>
           <div className="cart-actions">
-            {orderMessage && <SuccessMessage message={orderMessage} isError={isError} />}
+            {successMessage && <SuccessMessage message={successMessage} isError={successMessage.startsWith('Error')} />}
             <button
               className="place-order-btn"
               onClick={handlePlaceOrder}
