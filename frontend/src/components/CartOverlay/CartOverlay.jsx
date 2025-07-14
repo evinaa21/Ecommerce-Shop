@@ -38,7 +38,7 @@ const CartOverlay = () => {
       const timer = setTimeout(() => {
         setMessage('');
         setIsError(false);
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [message]);
@@ -74,17 +74,17 @@ const CartOverlay = () => {
       });
 
       if (data.createOrder.success) {
-        setMessage(data.createOrder.message);    // <--- Show success message
+        setMessage(data.createOrder.message);  
         setIsError(false);
         clearCart();
         setIsCartOpen(false);
       } else {
-        setMessage(`Error: ${data.createOrder.message}`);   // <--- Show error message
+        setMessage(`Error: ${data.createOrder.message}`);   
         setIsError(true);
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      setMessage(`Error placing order: ${e.message}`);     // <--- Show error message
+      setMessage(`Error placing order: ${e.message}`);    
       setIsError(true);
     }
   };
