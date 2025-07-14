@@ -8,23 +8,14 @@
 }
 
 .success-message {
+  background-color: #5ece7b;
+  color: white;
   padding: 12px 24px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   animation: fade-in-out 3s forwards;
-  color: white;
-}
-
-/* Success message style (green) */
-.success-message.success {
-  background-color: #5ece7b;
-}
-
-/* Error message style (red) */
-.success-message.error {
-  background-color: #e55353;
 }
 
 @keyframes fade-in-out {

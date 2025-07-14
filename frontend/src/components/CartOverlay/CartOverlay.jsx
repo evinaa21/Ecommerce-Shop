@@ -3,18 +3,21 @@ import { useCart } from '../../context/CartContext';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER } from '../../graphql/mutations';
 import CartItem from '../CartItem/CartItem.jsx';
-import SuccessMessage from '../SuccessMessage/SuccessMessage.jsx';
+import SuccessMessage from '../SuccessMessage/SuccessMessage';  // <--- Import
 import './CartOverlay.css';
 
 const CartOverlay = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, clearCart, successMessage, showSuccessMessage } = useCart();
-  const [placeOrder, { loading, error }] = useMutation(PLACE_ORDER);
+  const { cartItems, isCartOpen, setIsCartOpen, clearCart } = useCart();
+  const [placeOrder, { loading }] = useMutation(PLACE_ORDER);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  // New state for message
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+
   useEffect(() => {
     if (isCartOpen) {
-      // Opening cart
       setIsVisible(true);
       setIsClosing(false);
     } else {
@@ -27,7 +30,18 @@ const CartOverlay = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [isCartOpen, isVisible]); 
+  }, [isCartOpen, isVisible]);
+
+  // Clear message automatically after 3 seconds
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        setIsError(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   if (!isVisible) return null;
 
@@ -52,23 +66,26 @@ const CartOverlay = () => {
     }));
 
     try {
-      const { data } = await placeOrder({ 
-        variables: { 
+      const { data } = await placeOrder({
+        variables: {
           products: products,
           total: parseFloat(totalPrice.toFixed(2))
-        } 
+        }
       });
-      
+
       if (data.createOrder.success) {
-        showSuccessMessage(data.createOrder.message);
+        setMessage(data.createOrder.message);    // <--- Show success message
+        setIsError(false);
         clearCart();
         setIsCartOpen(false);
       } else {
-        showSuccessMessage(`Error: ${data.createOrder.message}`);
+        setMessage(`Error: ${data.createOrder.message}`);   // <--- Show error message
+        setIsError(true);
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      showSuccessMessage(`Error placing order: ${e.message}`);
+      setMessage(`Error placing order: ${e.message}`);     // <--- Show error message
+      setIsError(true);
     }
   };
 
@@ -79,41 +96,45 @@ const CartOverlay = () => {
   };
 
   return (
-    <div 
-      className={`cart-overlay-backdrop ${isClosing ? 'closing' : ''}`}
-      data-testid="cart-overlay"
-      onClick={handleBackdropClick}
-    >
-      <div 
-        className={`cart-overlay-container ${isClosing ? 'closing' : ''}`}
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <div
+        className={`cart-overlay-backdrop ${isClosing ? 'closing' : ''}`}
+        data-testid="cart-overlay"
+        onClick={handleBackdropClick}
       >
-        <div className="cart-overlay-header">
-          <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
-        </div>
-        <div className="cart-item-list">
-          {cartItems.map((item) => (
-            <CartItem key={item.cartId} item={item} />
-          ))}
-        </div>
-        <div className="cart-overlay-footer">
-          <div className="cart-total" data-testid="cart-total">
-            <span>Total</span>
-            <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
+        <div
+          className={`cart-overlay-container ${isClosing ? 'closing' : ''}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="cart-overlay-header">
+            <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
           </div>
-          <div className="cart-actions">
-            <button
-              className="place-order-btn"
-              onClick={handlePlaceOrder}
-              disabled={cartItems.length === 0 || loading}
-            >
-              {loading ? 'PLACING ORDER...' : 'PLACE ORDER'}
-            </button>
+          <div className="cart-item-list">
+            {cartItems.map((item) => (
+              <CartItem key={item.cartId} item={item} />
+            ))}
+          </div>
+          <div className="cart-overlay-footer">
+            <div className="cart-total" data-testid="cart-total">
+              <span>Total</span>
+              <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="cart-actions">
+              <button
+                className="place-order-btn"
+                onClick={handlePlaceOrder}
+                disabled={cartItems.length === 0 || loading}
+              >
+                {loading ? 'PLACING ORDER...' : 'PLACE ORDER'}
+              </button>
+            </div>
           </div>
         </div>
-        <SuccessMessage message={successMessage} isError={successMessage.startsWith('Error')} />
       </div>
-    </div>
+
+      {/* Show success or error message */}
+      <SuccessMessage message={message} isError={isError} />
+    </>
   );
 };
 
