@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER } from '../../graphql/mutations';
 import CartItem from '../CartItem/CartItem.jsx';
-import SuccessMessage from '../SuccessMessage/SuccessMessage';  // <--- Import
+import SuccessMessage from '../SuccessMessage/SuccessMessage';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
@@ -12,9 +12,7 @@ const CartOverlay = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // New state for message
-  const [message, setMessage] = useState('');
-  const [isError, setIsError] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     if (isCartOpen) {
@@ -32,16 +30,15 @@ const CartOverlay = () => {
     }
   }, [isCartOpen, isVisible]);
 
-  // Clear message automatically after 3 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage('');
-        setIsError(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
+  const addMessage = (text, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setMessages((prev) => [...prev, { id, text, type }]);
+    setTimeout(() => removeMessage(id), 5000);
+  };
+
+  const removeMessage = (id) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== id));
+  };
 
   if (!isVisible) return null;
 
@@ -74,18 +71,15 @@ const CartOverlay = () => {
       });
 
       if (data.createOrder.success) {
-        setMessage(data.createOrder.message);  
-        setIsError(false);
+        addMessage(data.createOrder.message, 'success');
         clearCart();
         setIsCartOpen(false);
       } else {
-        setMessage(`Error: ${data.createOrder.message}`);   
-        setIsError(true);
+        addMessage(`Error: ${data.createOrder.message}`, 'error');
       }
     } catch (e) {
       console.error('Error placing order:', e);
-      setMessage(`Error placing order: ${e.message}`);    
-      setIsError(true);
+      addMessage(`Error placing order: ${e.message}`, 'error');
     }
   };
 
@@ -132,8 +126,7 @@ const CartOverlay = () => {
         </div>
       </div>
 
-      {/* Show success or error message */}
-      <SuccessMessage message={message} isError={isError} />
+      <SuccessMessage messages={messages} removeMessage={removeMessage} />
     </>
   );
 };
