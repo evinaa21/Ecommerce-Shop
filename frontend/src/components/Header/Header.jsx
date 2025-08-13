@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
@@ -13,35 +13,24 @@ const Header = () => {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
- 
-  const base = ['all','clothes','tech'];
-  const fetched = data?.categories?.map(c => c.name) || [];
-  const unique = Array.from(new Set([...base, ...fetched]));
-
-  const categories = unique.map(name => ({ name }));
+  // Always include 'all' as the first category, then add dynamic categories
+  const categories = [
+    { name: 'all' },
+    ...(data?.categories || [])
+  ];
 
   const handleCartToggle = () => {
-    if (isCartOpen) {
-      setIsCartOpen(false);
-    } else {
-      setIsCartOpen(true);
-    }
+    setIsCartOpen(!isCartOpen);
   };
 
   const isCategoryActive = (categoryName) => {
-    const urlMapping = {
-      'tech': 'tech',
-      'clothes': 'clothes',
-      'all': 'all'
-    };
+    const currentPath = location.pathname.substring(1); // Remove leading slash
     
-    const urlPath = urlMapping[categoryName] || categoryName;
-    
- 
-    if (location.pathname === `/${urlPath}`) {
+    if (currentPath === categoryName) {
       return true;
     }
     
+    // For product pages, check current category from context
     if (location.pathname.startsWith('/product/')) {
       return currentCategory === categoryName;
     }
@@ -49,25 +38,20 @@ const Header = () => {
     return false;
   };
 
+  if (loading) return <header className="header">Loading...</header>;
+  if (error) return <header className="header">Error loading categories</header>;
+
   return (
     <header className="header">
       <nav className="header-nav">
         {categories.map((category) => {
           const { name } = category;
-          
-          const urlMapping = {
-            'tech': 'tech',
-            'clothes': 'clothes',
-            'all': 'all'
-          };
-          
-          const urlPath = urlMapping[name] || name;
           const isActive = isCategoryActive(name);
           
           return (
             <NavLink
               key={name}
-              to={`/${urlPath}`}
+              to={`/${name}`}
               className={isActive ? 'nav-link active' : 'nav-link'}
               data-testid={isActive ? 'active-category-link' : 'category-link'}
             >

@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Header from './components/Header/Header';
-import CategoryPage from './pages/CategoryPage/CategoryPage';
-import ProductPage from './pages/ProductPage/ProductPage';
+import DynamicRouter from './components/DynamicRouter/DynamicRouter';
 import CartOverlay from './components/CartOverlay/CartOverlay';
 import SuccessMessage from './components/SuccessMessage/SuccessMessage';
 import { useCart } from './context/CartContext';
@@ -13,14 +12,16 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname === '/all') {
+    const pathSegment = location.pathname.substring(1); // Remove leading slash
+    
+    if (pathSegment === 'all') {
       document.title = 'All Products | Ecommerce Shop';
-    } else if (location.pathname === '/clothes') {
-      document.title = 'Clothes | Ecommerce Shop';
-    } else if (location.pathname === '/tech') {
-      document.title = 'Tech | Ecommerce Shop';
     } else if (location.pathname.startsWith('/product/')) {
       document.title = 'Product Details | Ecommerce Shop';
+    } else if (pathSegment) {
+      // Dynamic category title
+      const categoryName = pathSegment.charAt(0).toUpperCase() + pathSegment.slice(1);
+      document.title = `${categoryName} | Ecommerce Shop`;
     } else {
       document.title = 'Ecommerce Shop';
     }
@@ -30,13 +31,7 @@ function App() {
     <div className="app">
       <Header />
       <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Navigate to="/all" replace />} />
-          <Route path="/all" element={<CategoryPage />} />
-          <Route path="/clothes" element={<CategoryPage />} />
-          <Route path="/tech" element={<CategoryPage />} />
-          <Route path="/product/:productId" element={<ProductPage />} />
-        </Routes>
+        <DynamicRouter />
       </main>
       <CartOverlay />
       <SuccessMessage message={successMessage} />

@@ -23,6 +23,14 @@ use GraphQL\Type\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
+$dotenvPath = realpath(__DIR__ . '/../');
+if (file_exists($dotenvPath . '/.env')) {
+    (Dotenv\Dotenv::createImmutable($dotenvPath))->load();
+}
+
+// Example usage (never commit real creds)
+$dbHost = $_ENV['DB_HOST'] ?? 'localhost';
+
 // health check
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {

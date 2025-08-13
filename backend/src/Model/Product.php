@@ -6,6 +6,7 @@ namespace App\Model;
 use App\Config\Database;
 use App\Model\Product\ClothingProduct;
 use App\Model\Product\TechProduct;
+use App\Model\Product\GenericProduct;
 use App\Model\Abstract\AbstractProduct;
 use PDO;
 
@@ -17,6 +18,15 @@ class Product
 {
     private PDO $db;
 
+    // Explicit category → class map to avoid relying on naming conventions.
+    private const CATEGORY_CLASS_MAP = [
+        'clothes' => ClothingProduct::class,
+        'clothing' => ClothingProduct::class, // Handle both variants
+        'tech' => TechProduct::class,
+        'technology' => TechProduct::class,
+        // Add more mappings as needed
+    ];
+
     public function __construct()
     {
         $this->db = Database::getConnection();
@@ -27,17 +37,15 @@ class Product
      */
     private function factory(array $data): AbstractProduct
     {
-        // No if/switch block. We use the category name to dynamically
-        // determine the class name. This is a clean, polymorphic approach.
-        $category = ucfirst($data['category_name']);
-        $className = "App\\Model\\Product\\{$category}Product";
-
-        if (class_exists($className)) {
+        $categoryKey = strtolower(trim($data['category_name'] ?? ''));
+        
+        if (isset(self::CATEGORY_CLASS_MAP[$categoryKey])) {
+            $className = self::CATEGORY_CLASS_MAP[$categoryKey];
             return new $className($data);
         }
-
-        // Fallback for categories like 'all' or if a class doesn't exist
-        return new ClothingProduct($data); // Or a generic product class
+        
+        // Safe fallback to generic product instead of assuming ClothingProduct
+        return new GenericProduct($data);
     }
 
     public function findById(string $id): ?AbstractProduct
