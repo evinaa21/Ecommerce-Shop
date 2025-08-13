@@ -7,7 +7,7 @@ import App from './App.jsx';
 import './index.css';
 
 const client = new ApolloClient({
-  uri: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/', 
   cache: new InMemoryCache(),
 });
 

@@ -17,13 +17,13 @@ class Category
 
 
     /**
-     * @return array
+     * Returns all categories except 'all' (which is handled separately in frontend)
      */
 
 
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT * From categories");
+        $stmt = $this->db->query("SELECT * FROM categories WHERE name != 'all'");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
