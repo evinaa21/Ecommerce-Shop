@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
@@ -7,6 +7,7 @@ import './Header.css';
 import logo from '../../assets/icon.png';
 
 const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { loading, error, data } = useQuery(GET_CATEGORIES);
   const { cartItems, isCartOpen, setIsCartOpen, currentCategory } = useCart();
@@ -21,6 +22,14 @@ const Header = () => {
 
   const handleCartToggle = () => {
     setIsCartOpen(!isCartOpen);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   const isCategoryActive = (categoryName) => {
@@ -43,7 +52,17 @@ const Header = () => {
 
   return (
     <header className="header">
-      <nav className="header-nav">
+      <button 
+        className="mobile-menu-btn"
+        onClick={toggleMobileMenu}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav className={`header-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         {categories.map((category) => {
           const { name } = category;
           const isActive = isCategoryActive(name);
@@ -54,15 +73,18 @@ const Header = () => {
               to={`/${name}`}
               className={isActive ? 'nav-link active' : 'nav-link'}
               data-testid={isActive ? 'active-category-link' : 'category-link'}
+              onClick={closeMobileMenu}
             >
               {name.toUpperCase()}
             </NavLink>
           );
         })}
       </nav>
+
       <div className="header-logo">
         <img src={logo} alt="Shop Logo" className="logo-image" />
       </div>
+
       <div className="header-actions">
         <button
           onClick={handleCartToggle}

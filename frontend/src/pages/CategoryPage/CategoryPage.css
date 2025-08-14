@@ -12,3 +12,42 @@
   gap: 100px 40px;
   justify-items: center;
 }
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .category-title {
+    font-size: 36px;
+    margin-bottom: 60px;
+  }
+  
+  .product-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 60px 30px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .category-title {
+    font-size: 28px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  
+  .product-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 40px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+  
+  .product-list {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}

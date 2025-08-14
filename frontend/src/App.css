@@ -5,3 +5,23 @@
 .main-content {
   padding: 80px 100px;
 }
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 60px 40px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 16px 12px;
+  }
+}

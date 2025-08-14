@@ -28,9 +28,11 @@ export const MESSAGES = {
 };
 
 export const BREAKPOINTS = {
+  MOBILE_SMALL: '480px',
   MOBILE: '768px',
   TABLET: '1024px',
   DESKTOP: '1200px',
+  DESKTOP_LARGE: '1440px',
 };
 
 export const CART_LIMITS = {
