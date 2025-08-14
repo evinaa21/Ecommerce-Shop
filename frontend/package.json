@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "build:clean": "rm -rf dist && vite build",
+    "preview": "vite preview",
+    "preview:host": "vite preview --host",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",

@@ -44,16 +44,27 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  border-radius: 4px;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .attribute-option:hover {
   background: #1d1f22;
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(29, 31, 34, 0.2);
+}
+
+.attribute-option:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(29, 31, 34, 0.2);
 }
 
 .attribute-option.selected {
   background: #1d1f22;
   color: white;
+  box-shadow: 0 2px 8px rgba(29, 31, 34, 0.3);
 }
 
 .attribute-option.swatch {
@@ -63,14 +74,110 @@
   border: 1px solid #1d1f22;
   padding: 0;
   position: relative;
+  border-radius: 50%;
 }
 
 .attribute-option.swatch.selected {
-  outline: 1px solid #5ece7b;
-  outline-offset: 1px;
+  outline: 2px solid #5ece7b;
+  outline-offset: 2px;
+  transform: scale(1.1);
 }
 
 .attribute-option.swatch:hover {
-  outline: 1px solid #5ece7b;
-  outline-offset: 1px;
+  outline: 2px solid #5ece7b;
+  outline-offset: 2px;
+  transform: scale(1.1);
+}
+
+.attribute-option.swatch:active {
+  transform: scale(1.05);
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .product-attributes {
+    gap: 18px;
+  }
+
+  .attribute-name {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .attribute-options {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .attribute-option {
+    min-width: 60px;
+    height: 42px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+
+  .attribute-option.swatch {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .product-attributes {
+    gap: 16px;
+  }
+
+  .attribute-name {
+    font-size: 15px;
+  }
+
+  .attribute-options {
+    gap: 8px;
+  }
+
+  .attribute-option {
+    min-width: 56px;
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    min-height: 44px; /* Better touch target */
+  }
+
+  .attribute-option.swatch {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-attributes {
+    gap: 14px;
+  }
+
+  .attribute-name {
+    font-size: 14px;
+  }
+
+  .attribute-options {
+    gap: 6px;
+  }
+
+  .attribute-option {
+    min-width: 52px;
+    height: 38px;
+    padding: 0 14px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .attribute-option.swatch {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+  }
 }

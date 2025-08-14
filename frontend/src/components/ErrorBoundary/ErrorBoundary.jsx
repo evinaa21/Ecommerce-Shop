@@ -8,7 +8,7 @@ class ErrorBoundary extends React.Component {
       hasError: false, 
       error: null, 
       errorInfo: null,
-      eventId: null 
+      retryCount: 0
     };
   }
 
@@ -22,50 +22,84 @@ class ErrorBoundary extends React.Component {
       errorInfo
     });
 
-    // Log to monitoring service
-    if (process.env.NODE_ENV === 'production') {
-      // Example: Sentry.captureException(error, { contexts: { errorInfo } });
-      console.error('Error caught by boundary:', error, errorInfo);
-    } else {
-      console.error('Error caught by boundary:', error, errorInfo);
+    // Auto-retry once for chunk loading errors
+    if (error.message?.includes('Loading chunk') && this.state.retryCount === 0) {
+      setTimeout(() => {
+        this.setState(prevState => ({
+          hasError: false,
+          error: null,
+          errorInfo: null,
+          retryCount: prevState.retryCount + 1
+        }));
+      }, 1000);
     }
+
+    console.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleRetry = () => {
     this.setState({ 
       hasError: false, 
       error: null, 
-      errorInfo: null 
+      errorInfo: null,
+      retryCount: 0
     });
+  };
+
+  handleHardReload = () => {
+    // Clear all caches and reload
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => registration.unregister());
+      });
+    }
+    
+    // Clear localStorage and sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Hard reload
+    window.location.reload(true);
   };
 
   render() {
     if (this.state.hasError) {
+      const isChunkError = this.state.error?.message?.includes('Loading chunk');
+      const isNetworkError = this.state.error?.message?.includes('Failed to fetch');
+
       return (
         <div className="error-boundary">
           <div className="error-content">
             <h2>Oops! Something went wrong</h2>
-            <p>We're sorry, but something unexpected happened.</p>
             
-            {process.env.NODE_ENV === 'development' && (
-              <details style={{ marginTop: '20px' }}>
-                <summary>Error Details (Development Only)</summary>
-                <pre style={{ marginTop: '10px', textAlign: 'left' }}>
-                  {this.state.error && this.state.error.toString()}
-                  <br />
-                  {this.state.errorInfo.componentStack}
-                </pre>
-              </details>
+            {isChunkError && (
+              <p>It looks like the app was updated. Please refresh the page.</p>
+            )}
+            
+            {isNetworkError && (
+              <p>Network connection issue. Please check your internet connection.</p>
+            )}
+            
+            {!isChunkError && !isNetworkError && (
+              <p>We're sorry, but something unexpected happened.</p>
             )}
             
             <div className="error-actions">
               <button onClick={this.handleRetry} className="retry-btn">
                 Try Again
               </button>
-              <button onClick={() => window.location.reload()} className="reload-btn">
-                Reload Page
+              <button onClick={this.handleHardReload} className="reload-btn">
+                Hard Refresh
               </button>
             </div>
+            
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <details className="error-details">
+                <summary>Error Details</summary>
+                <pre>{this.state.error.toString()}</pre>
+                <pre>{this.state.errorInfo.componentStack}</pre>
+              </details>
+            )}
           </div>
         </div>
       );

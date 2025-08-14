@@ -14,6 +14,7 @@
   line-height: 27px;
   color: #1d1f22;
   margin: 0;
+  word-wrap: break-word;
 }
 
 .product-price {
@@ -55,17 +56,28 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   margin-top: 30px;
+  border-radius: 4px;
+  touch-action: manipulation;
 }
 
 .add-to-cart-btn:hover:not(.disabled) {
   background: #4caf50;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(94, 206, 123, 0.3);
+}
+
+.add-to-cart-btn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(94, 206, 123, 0.3);
 }
 
 .add-to-cart-btn.disabled {
   background: #a8a8a8;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .product-description {
@@ -86,4 +98,112 @@
 
 .description-content p:last-child {
   margin-bottom: 0;
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .product-info {
+    max-width: 100%;
+    margin-left: 0;
+    gap: 18px;
+  }
+
+  .product-name {
+    font-size: 28px;
+    line-height: 32px;
+  }
+
+  .price-label {
+    font-size: 16px;
+  }
+
+  .price-amount {
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  .add-to-cart-btn {
+    height: 48px;
+    font-size: 15px;
+    margin-top: 24px;
+  }
+
+  .description-content {
+    font-size: 15px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .product-info {
+    gap: 16px;
+  }
+
+  .product-name {
+    font-size: 24px;
+    line-height: 28px;
+    text-align: center;
+  }
+
+  .price-label {
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .price-amount {
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  .add-to-cart-btn {
+    height: 48px;
+    font-size: 14px;
+    margin-top: 20px;
+    min-height: 44px; /* Better touch target */
+  }
+
+  .product-description {
+    margin-top: 24px;
+  }
+
+  .description-content {
+    font-size: 14px;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-info {
+    gap: 14px;
+  }
+
+  .product-name {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .price-label {
+    font-size: 14px;
+  }
+
+  .price-amount {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .add-to-cart-btn {
+    height: 44px;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  .product-description {
+    margin-top: 20px;
+  }
+
+  .description-content {
+    font-size: 13px;
+    line-height: 150%;
+  }
 }

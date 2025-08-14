@@ -1,7 +1,8 @@
 .cart-item-controls {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: stretch;
+  flex-shrink: 0;
 }
 
 .quantity-controls {
@@ -9,11 +10,12 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  min-width: 32px;
 }
 
 .quantity-controls button {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   font-size: 18px;
   background-color: #fff;
   border: 1px solid #1d1f22;
@@ -22,10 +24,20 @@
   align-items: center;
   justify-content: center;
   font-weight: 300;
+  transition: all 0.2s ease;
+  border-radius: 2px;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .quantity-controls button:hover {
   background-color: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.quantity-controls button:active {
+  transform: scale(0.95);
+  background-color: #e0e0e0;
 }
 
 .quantity-controls span {
@@ -33,17 +45,113 @@
   font-weight: 500;
   line-height: 1.6;
   font-family: "Raleway", sans-serif;
+  padding: 4px 0;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
 }
 
 .item-image-container {
   width: 121px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f8f8f8;
 }
 
 .item-image {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.item-image:hover {
+  transform: scale(1.02);
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .cart-item-controls {
+    gap: 10px;
+  }
+
+  .quantity-controls button {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .quantity-controls span {
+    font-size: 15px;
+  }
+
+  .item-image-container {
+    width: 100px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .cart-item-controls {
+    gap: 8px;
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .quantity-controls {
+    flex-direction: row;
+    min-width: auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .quantity-controls button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    min-height: 44px; /* Better touch target */
+    min-width: 44px;
+  }
+
+  .quantity-controls span {
+    font-size: 14px;
+    padding: 0 8px;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  .item-image-container {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-item-controls {
+    gap: 6px;
+  }
+
+  .quantity-controls button {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .quantity-controls span {
+    font-size: 13px;
+    padding: 0 6px;
+    min-width: 28px;
+  }
+
+  .item-image-container {
+    width: 70px;
+    height: 70px;
+  }
 }

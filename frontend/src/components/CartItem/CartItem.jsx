@@ -14,49 +14,51 @@ const CartItem = ({ item }) => {
 
   return (
     <div className="cart-item" data-testid={`cart-item-${cartId}`}>
-      <div className="item-details">
-        <p className="item-name">{name}</p>
-        {price && (
-          <p className="item-price">{formatPrice(price.amount, price.currency_symbol)}</p>
-        )}
-        
-        {attributes && attributes.map((attr) => (
-          <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${toKebabCase(attr.name)}`}>
-            <p className="attribute-name">{attr.name}:</p>
-            <div className="attribute-options">
-              {attr.items.map((option) => {
-                const isSelected = selectedAttributes[attr.id] === option.value;
-                const testId = getCartAttributeTestId(attr.name, option.value, isSelected);
-                
-                return (
-                  <button
-                    key={option.value}
-                    className={`
-                      attribute-button
-                      ${attr.type === 'swatch' ? 'swatch' : ''}
-                      ${isSelected ? 'selected' : ''}
-                    `}
-                    style={attr.type === 'swatch' ? { backgroundColor: option.value } : {}}
-                    data-testid={testId}
-                    aria-label={`Select ${attr.name} ${option.display_value}`}
-                    disabled
-                  >
-                    {attr.type !== 'swatch' && option.value}
-                  </button>
-                );
-              })}
+      <div className="cart-item-main">
+        <div className="item-details">
+          <p className="item-name">{name}</p>
+          {price && (
+            <p className="item-price">{formatPrice(price.amount, price.currency_symbol)}</p>
+          )}
+          
+          {attributes && attributes.map((attr) => (
+            <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${toKebabCase(attr.name)}`}>
+              <p className="attribute-name">{attr.name}:</p>
+              <div className="attribute-options">
+                {attr.items.map((option) => {
+                  const isSelected = selectedAttributes[attr.id] === option.value;
+                  const testId = getCartAttributeTestId(attr.name, option.value, isSelected);
+                  
+                  return (
+                    <button
+                      key={option.value}
+                      className={`
+                        attribute-button
+                        ${attr.type === 'swatch' ? 'swatch' : ''}
+                        ${isSelected ? 'selected' : ''}
+                      `}
+                      style={attr.type === 'swatch' ? { backgroundColor: option.value } : {}}
+                      data-testid={testId}
+                      aria-label={`Select ${attr.name} ${option.display_value}`}
+                      disabled
+                    >
+                      {attr.type !== 'swatch' && option.value}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        
+        <CartItemControls
+          cartId={cartId}
+          quantity={quantity}
+          onUpdateQuantity={updateQuantity}
+          image={gallery[0]}
+          name={name}
+        />
       </div>
-      
-      <CartItemControls
-        cartId={cartId}
-        quantity={quantity}
-        onUpdateQuantity={updateQuantity}
-        image={gallery[0]}
-        name={name}
-      />
     </div>
   );
 };
