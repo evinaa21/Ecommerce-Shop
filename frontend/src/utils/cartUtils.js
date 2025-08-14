@@ -1,3 +1,5 @@
+import { calculateTotalItems, calculateTotalPrice } from './priceUtils'; // Add this import
+
 /**
  * Generates a unique cart ID for a product with selected attributes
  * @param {string} productId - The product ID

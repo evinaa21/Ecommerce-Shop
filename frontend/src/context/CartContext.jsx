@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { generateCartId, validateCart, getCartStatistics } from '../utils/cartUtils';
+import { calculateTotalItems } from '../utils/priceUtils'; // Add this import
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { MESSAGES, LOCAL_STORAGE_KEYS, CART_LIMITS } from '../constants';
 
