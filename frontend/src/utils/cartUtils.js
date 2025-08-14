@@ -1,4 +1,4 @@
-import { calculateTotalItems, calculateTotalPrice } from './priceUtils'; // Add this import
+import { calculateTotalItems, calculateTotalPrice } from './priceUtils'; 
 
 /**
  * Generates a unique cart ID for a product with selected attributes

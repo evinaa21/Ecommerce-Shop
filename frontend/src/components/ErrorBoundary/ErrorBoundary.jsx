@@ -22,7 +22,7 @@ class ErrorBoundary extends React.Component {
       errorInfo
     });
 
-    // Auto-retry once for chunk loading errors
+    
     if (error.message?.includes('Loading chunk') && this.state.retryCount === 0) {
       setTimeout(() => {
         this.setState(prevState => ({
@@ -47,18 +47,18 @@ class ErrorBoundary extends React.Component {
   };
 
   handleHardReload = () => {
-    // Clear all caches and reload
+    
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         registrations.forEach(registration => registration.unregister());
       });
     }
     
-    // Clear localStorage and sessionStorage
+    
     localStorage.clear();
     sessionStorage.clear();
     
-    // Hard reload
+    
     window.location.reload(true);
   };
 

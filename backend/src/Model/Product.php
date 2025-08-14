@@ -1,6 +1,6 @@
 <?php
 
-// We're using a namespace to organize our code - this class lives in App\Model
+
 namespace App\Model;
 
 use App\Config\Database;
@@ -15,13 +15,13 @@ class Product
     private PDO $db;
     private static array $cache = [];
 
-    // Explicit category → class map to avoid relying on naming conventions.
+    
     private const CATEGORY_CLASS_MAP = [
         'clothes' => ClothingProduct::class,
-        'clothing' => ClothingProduct::class, // Handle both variants
+        'clothing' => ClothingProduct::class, 
         'tech' => TechProduct::class,
         'technology' => TechProduct::class,
-        // Add more mappings as needed
+        
     ];
 
     public function __construct()
@@ -41,13 +41,13 @@ class Product
             return new $className($data);
         }
         
-        // Safe fallback to generic product instead of assuming ClothingProduct
+        
         return new GenericProduct($data);
     }
 
     public function findById(string $id): ?AbstractProduct
     {
-        // Simple in-memory cache
+        
         $cacheKey = "product_$id";
         if (isset(self::$cache[$cacheKey])) {
             return self::$cache[$cacheKey];
@@ -78,7 +78,7 @@ class Product
             return self::$cache[$cacheKey];
         }
 
-        // Optimized single query with JOINs
+        
         $sql = "
             SELECT 
                 p.id, p.name, p.in_stock, p.brand,
@@ -121,12 +121,12 @@ class Product
                 ];
             }
 
-            // Add gallery image if exists
+            
             if ($row['gallery_url'] && !in_array($row['gallery_url'], $productMap[$productId]['gallery'])) {
                 $productMap[$productId]['gallery'][] = $row['gallery_url'];
             }
 
-            // Add price if exists
+            
             if ($row['amount'] && !$this->priceExists($productMap[$productId]['prices'], $row)) {
                 $productMap[$productId]['prices'][] = [
                     'amount' => $row['amount'],
@@ -135,7 +135,7 @@ class Product
                 ];
             }
 
-            // Add attributes if exists
+            
             if ($row['attr_id']) {
                 $this->addAttributeToProduct($productMap[$productId], $row);
             }
@@ -163,7 +163,7 @@ class Product
         $attrId = $row['attr_id'];
         $attrIndex = null;
 
-        // Find existing attribute
+        
         foreach ($product['attributes'] as $index => $attr) {
             if ($attr['id'] == $attrId) {
                 $attrIndex = $index;
@@ -171,7 +171,7 @@ class Product
             }
         }
 
-        // Create new attribute if not exists
+        
         if ($attrIndex === null) {
             $product['attributes'][] = [
                 'id' => $attrId,
@@ -182,7 +182,7 @@ class Product
             $attrIndex = count($product['attributes']) - 1;
         }
 
-        // Add item if not exists
+        
         if ($row['attr_value']) {
             $itemExists = false;
             foreach ($product['attributes'][$attrIndex]['items'] as $item) {

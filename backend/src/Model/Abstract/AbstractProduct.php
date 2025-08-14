@@ -27,7 +27,7 @@ abstract class AbstractProduct
         $this->name = $data['name'];
         $this->in_stock = $data['in_stock'];
         $this->description = $data['description'];
-        $this->category = $data['category_name']; // We'll get this from our query
+        $this->category = $data['category_name']; 
         $this->brand = $data['brand'];
 
         $this->loadDetails();
@@ -39,17 +39,17 @@ abstract class AbstractProduct
      */
     protected function loadDetails(): void
     {
-        // Load Gallery
+        
         $stmt = $this->db->prepare("SELECT url FROM product_gallery WHERE product_id = :id");
         $stmt->execute(['id' => $this->id]);
         $this->gallery = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        // Load Prices
+        
         $stmt = $this->db->prepare("SELECT amount, currency_label, currency_symbol FROM product_prices WHERE product_id = :id");
         $stmt->execute(['id' => $this->id]);
         $this->prices = $stmt->fetchAll();
 
-        // Load Attributes
+        
         $this->loadAttributes();
     }
 

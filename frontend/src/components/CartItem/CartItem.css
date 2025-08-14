@@ -18,7 +18,7 @@
   flex-direction: column;
   flex-grow: 1;
   gap: 8px;
-  min-width: 0; /* Prevent overflow */
+  min-width: 0;
 }
 
 .item-brand,
@@ -99,7 +99,7 @@
   outline-offset: 1px;
 }
 
-/* Tablet styles */
+
 @media (max-width: 1024px) {
   .cart-item {
     gap: 12px;
@@ -137,7 +137,7 @@
   }
 }
 
-/* Mobile styles */
+
 @media (max-width: 768px) {
   .cart-item {
     flex-direction: column;

@@ -259,7 +259,7 @@
   color: #e74c3c;
 }
 
-/* Enhanced tablet styles */
+
 @media (max-width: 1024px) {
   .product-page {
     padding: 30px 40px;
@@ -283,7 +283,7 @@
   }
 }
 
-/* Enhanced mobile styles */
+
 @media (max-width: 768px) {
   .product-page {
     padding: 20px 16px;

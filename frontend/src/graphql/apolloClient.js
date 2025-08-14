@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 
-// Error handling link
+
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
@@ -12,11 +12,11 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
   if (networkError) {
     console.error(`Network error: ${networkError}`);
-    // You could add retry logic here
+    
   }
 });
 
-// Retry link for failed requests
+
 const retryLink = new RetryLink({
   delay: {
     initial: 300,
@@ -30,7 +30,7 @@ const retryLink = new RetryLink({
 });
 
 const httpLink = new HttpLink({
-  uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/',
+  uri: 'https:
 });
 
 const client = new ApolloClient({
@@ -40,7 +40,7 @@ const client = new ApolloClient({
       Product: {
         fields: {
           gallery: {
-            merge: false, // Don't merge arrays, replace them
+            merge: false, 
           },
           attributes: {
             merge: false,

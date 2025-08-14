@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-// Fragment for reusable fields
+
 const PRODUCT_FRAGMENT = gql`
   fragment ProductInfo on Product {
     id

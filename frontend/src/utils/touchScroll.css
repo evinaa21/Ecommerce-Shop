@@ -1,10 +1,10 @@
-/* Global touch scrolling improvements */
+
 * {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar for webkit browsers */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -24,15 +24,15 @@
   background: #4caf50;
 }
 
-/* Mobile specific improvements */
+
 @media (max-width: 768px) {
-  /* Improve touch targets */
+ 
   button, .attribute-option, .nav-link {
     min-height: 44px;
     min-width: 44px;
   }
 
-  /* Better focus styles for accessibility */
+ 
   button:focus,
   .attribute-option:focus,
   .nav-link:focus {
@@ -40,7 +40,7 @@
     outline-offset: 2px;
   }
 
-  /* Prevent zoom on input focus */
+ 
   input, select, textarea {
     font-size: 16px;
   }

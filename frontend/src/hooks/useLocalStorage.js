@@ -21,7 +21,7 @@ export const useLocalStorage = (key, initialValue) => {
     }
   });
 
-  // Use ref to always get the latest value
+  
   const storedValueRef = useRef(storedValue);
   storedValueRef.current = storedValue;
 
@@ -36,7 +36,7 @@ export const useLocalStorage = (key, initialValue) => {
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
-  }, [key]); // Remove storedValue dependency
+  }, [key]); 
 
   const removeValue = useCallback(() => {
     try {

@@ -6,16 +6,45 @@ import CategoryPage from '../../pages/CategoryPage/CategoryPage';
 import ProductPage from '../../pages/ProductPage/ProductPage';
 
 const DynamicRouter = () => {
-  const { loading, error, data } = useQuery(GET_CATEGORIES);
+  const { loading, error, data, refetch } = useQuery(GET_CATEGORIES, {
+    fetchPolicy: 'cache-first',
+    errorPolicy: 'all',
+    notifyOnNetworkStatusChange: true,
+    onError: (error) => {
+      console.error('Router categories query error:', error);
+    }
+  });
 
-  if (loading) return <div>Loading routes...</div>;
-  if (error) return <div>Error loading routes: {error.message}</div>;
-
-  // Always include 'all' as the first category, then add dynamic categories
-  const categories = [
+  // Fallback categories
+  const fallbackCategories = [
     { name: 'all' },
-    ...(data?.categories || [])
+    { name: 'clothes' },
+    { name: 'tech' }
   ];
+
+  // Use data categories if available, otherwise use fallback
+  const categories = data?.categories ? 
+    [{ name: 'all' }, ...data.categories] : 
+    fallbackCategories;
+
+  if (loading && !data) {
+    return (
+      <div className="router-loading">
+        <p>Loading routes...</p>
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="router-error">
+        <p>Error loading routes: {error.message}</p>
+        <button onClick={() => refetch()} className="retry-btn">
+          Retry Loading Routes
+        </button>
+      </div>
+    );
+  }
 
   return (
     <Routes>

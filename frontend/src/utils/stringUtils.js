@@ -8,7 +8,7 @@ export const toKebabCase = (str) => {
   return str
     .replace(/\s+/g, '-')
     .replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
-    .replace(/^-/, '') // Remove leading dash
+    .replace(/^-/, '') 
     .toLowerCase();
 };
 
@@ -46,7 +46,7 @@ export const capitalize = (str) => {
 export const getSizeInitials = (value) => {
   if (!value) return '';
   
-  // If it's a number or starts with a number, return as is
+  
   if (!isNaN(value) || /^\d+/.test(value)) {
     return value; 
   }
