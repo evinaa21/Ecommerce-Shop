@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 /**
  * Custom hook for managing localStorage with automatic JSON parsing/stringifying
  * @param {string} key - The localStorage key
  * @param {any} initialValue - The initial value if nothing is stored
- * @returns {[any, function]} - [value, setValue]
+ * @returns {[any, function, function]} - [value, setValue, removeValue]
  */
 export const useLocalStorage = (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(() => {
@@ -21,9 +21,13 @@ export const useLocalStorage = (key, initialValue) => {
     }
   });
 
+  // Use ref to always get the latest value
+  const storedValueRef = useRef(storedValue);
+  storedValueRef.current = storedValue;
+
   const setValue = useCallback((value) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const valueToStore = value instanceof Function ? value(storedValueRef.current) : value;
       setStoredValue(valueToStore);
       
       if (typeof window !== 'undefined') {
@@ -32,7 +36,7 @@ export const useLocalStorage = (key, initialValue) => {
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
-  }, [key, storedValue]);
+  }, [key]); // Remove storedValue dependency
 
   const removeValue = useCallback(() => {
     try {

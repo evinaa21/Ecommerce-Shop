@@ -1,5 +1,5 @@
 export const API_ENDPOINTS = {
-  GRAPHQL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  GRAPHQL: import.meta.env.VITE_API_URL || 'https://ecommerce-shop-production-3d0b.up.railway.app/',
 };
 
 export const LOCAL_STORAGE_KEYS = {
@@ -10,15 +10,15 @@ export const LOCAL_STORAGE_KEYS = {
 
 export const MESSAGES = {
   SUCCESS: {
-    ITEM_ADDED: 'Item added successfully',
-    ORDER_PLACED: 'Order placed successfully',
+    ITEM_ADDED: 'Item added to cart successfully!',
+    ORDER_PLACED: 'Order placed successfully!',
     ITEM_REMOVED: 'Item removed from cart',
   },
   ERROR: {
     NETWORK: 'Network connection failed',
     SERVER: 'Server error occurred',
     NOT_FOUND: 'Item not found',
-    OUT_OF_STOCK: 'Item is out of stock',
+    OUT_OF_STOCK: 'This item is currently out of stock',
   },
   LOADING: {
     PRODUCTS: 'Loading products...',
