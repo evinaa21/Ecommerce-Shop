@@ -1,24 +1,24 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
+import CartItemControls from '../CartItemControls/CartItemControls';
 import './CartItem.css';
 
 const CartItem = ({ item }) => {
-  const { updateQuantity, updateAttributes } = useCart();
+  const { updateQuantity } = useCart();
   const { name, brand, prices, attributes, gallery, quantity, cartId, selectedAttributes } = item;
   
-   const price = prices && prices.length > 0 ? prices[0] : null;
+  const price = prices && prices.length > 0 ? prices[0] : null;
 
   const kebabCase = (str) => str ? str.replace(/\s+/g, '-').toLowerCase() : '';
 
   return (
     <div className="cart-item" data-testid={`cart-item-${cartId}`}>
       <div className="item-details">
-        
         <p className="item-name">{name}</p>
-        {/* Only render price if it exists */}
         {price && (
           <p className="item-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
         )}
+        
         {attributes && attributes.map((attr) => (
           <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${kebabCase(attr.name)}`}>
             <p className="attribute-name">{attr.name}:</p>
@@ -47,16 +47,14 @@ const CartItem = ({ item }) => {
           </div>
         ))}
       </div>
-      <div className="item-controls">
-        <div className="quantity-controls">
-          <button onClick={() => updateQuantity(cartId, 1)} data-testid="cart-item-amount-increase">+</button>
-          <span data-testid="cart-item-amount">{quantity}</span>
-          <button onClick={() => updateQuantity(cartId, -1)} data-testid="cart-item-amount-decrease">−</button>
-        </div>
-        <div className="item-image-container">
-          <img src={gallery[0]} alt={name} className="item-image" />
-        </div>
-      </div>
+      
+      <CartItemControls
+        cartId={cartId}
+        quantity={quantity}
+        onUpdateQuantity={updateQuantity}
+        image={gallery[0]}
+        name={name}
+      />
     </div>
   );
 };

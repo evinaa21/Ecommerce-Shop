@@ -1,0 +1,76 @@
+.product-attributes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.product-attribute {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.attribute-name {
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 18px;
+  color: #1d1f22;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.attribute-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.attribute-option {
+  min-width: 63px;
+  height: 45px;
+  padding: 0 22px;
+  border: 1px solid #1d1f22;
+  background: white;
+  color: #1d1f22;
+  cursor: pointer;
+  font-family: "Source Sans Pro", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 18px;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.attribute-option:hover {
+  background: #1d1f22;
+  color: white;
+}
+
+.attribute-option.selected {
+  background: #1d1f22;
+  color: white;
+}
+
+.attribute-option.swatch {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border: 1px solid #1d1f22;
+  padding: 0;
+  position: relative;
+}
+
+.attribute-option.swatch.selected {
+  outline: 1px solid #5ece7b;
+  outline-offset: 1px;
+}
+
+.attribute-option.swatch:hover {
+  outline: 1px solid #5ece7b;
+  outline-offset: 1px;
+}

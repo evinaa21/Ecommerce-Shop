@@ -1,0 +1,42 @@
+.cart-summary {
+  padding-top: 20px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Raleway", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.cart-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.place-order-btn {
+  flex: 1;
+  height: 43px;
+  background: #5ece7b;
+  border: none;
+  color: white;
+  font-family: "Raleway", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.place-order-btn:hover:not(:disabled) {
+  background: #4caf50;
+}
+
+.place-order-btn:disabled {
+  background: #a8a8a8;
+  cursor: not-allowed;
+}

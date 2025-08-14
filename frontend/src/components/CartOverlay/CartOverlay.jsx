@@ -3,6 +3,8 @@ import { useCart } from '../../context/CartContext';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER } from '../../graphql/mutations';
 import CartItem from '../CartItem/CartItem.jsx';
+import CartHeader from '../CartHeader/CartHeader';
+import CartSummary from '../CartSummary/CartSummary';
 import SuccessMessage from '../SuccessMessage/SuccessMessage';
 import './CartOverlay.css';
 
@@ -88,29 +90,22 @@ const CartOverlay = () => {
           className={`cart-overlay-container ${isClosing ? 'closing' : ''}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="cart-overlay-header">
-            <strong>My Bag,</strong> {totalItems} {totalItems === 1 ? 'Item' : 'Items'}
-          </div>
+          <CartHeader totalItems={totalItems} />
+          
           <div className="cart-item-list">
             {cartItems.map((item) => (
               <CartItem key={item.cartId} item={item} />
             ))}
           </div>
-          <div className="cart-overlay-footer">
-            <div className="cart-total" data-testid="cart-total">
-              <span>Total</span>
-              <span>{cartItems[0]?.prices[0]?.currency_symbol}{totalPrice.toFixed(2)}</span>
-            </div>
-            <div className="cart-actions">
-              <button
-                className="place-order-btn"
-                onClick={handlePlaceOrder}
-                disabled={cartItems.length === 0 || loading}
-              >
-                {loading ? 'PLACING ORDER...' : 'PLACE ORDER'}
-              </button>
-            </div>
-          </div>
+          
+          <CartSummary
+            totalItems={totalItems}
+            totalPrice={totalPrice}
+            currencySymbol={cartItems[0]?.prices[0]?.currency_symbol || '$'}
+            onPlaceOrder={handlePlaceOrder}
+            loading={loading}
+            disabled={cartItems.length === 0}
+          />
         </div>
       </div>
 
