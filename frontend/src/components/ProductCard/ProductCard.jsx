@@ -1,28 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { formatPrice, getFirstPrice } from '../../utils/priceUtils';
+import { createDefaultAttributes } from '../../utils/cartUtils';
+import { getProductTestId } from '../../utils/testUtils';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
   const { name, in_stock, gallery, prices, id, attributes } = product;
   const { addToCart } = useCart();
 
-  const price = prices[0]; 
+  const price = getFirstPrice(prices);
+  
   const handleQuickShop = (e) => {
     e.preventDefault(); 
-    const defaultAttributes = attributes.reduce((acc, attr) => {
-      acc[attr.id] = attr.items[0].value;       return acc;
-    }, {});
+    const defaultAttributes = createDefaultAttributes(attributes);
     addToCart(product, defaultAttributes);
   };
-
-  const kebabCaseName = name.replace(/\s+/g, '-').toLowerCase();
 
   return (
     <Link to={`/product/${id}`} className="product-card-link">
       <div
         className={`product-card ${!in_stock ? 'out-of-stock' : ''}`}
-        data-testid={`product-${kebabCaseName}`}
+        data-testid={getProductTestId(name)}
       >
         <div className="image-container">
           <img src={gallery[0]} alt={name} className="product-image" />
@@ -39,7 +39,7 @@ const ProductCard = ({ product }) => {
         </div>
         <div className="product-info">
           <p className="product-name">{name}</p>
-          <p className="product-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
+          <p className="product-price">{formatPrice(price.amount, price.currency_symbol)}</p>
         </div>
       </div>
     </Link>

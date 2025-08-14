@@ -1,31 +1,33 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
 import CartItemControls from '../CartItemControls/CartItemControls';
+import { formatPrice, getFirstPrice } from '../../utils/priceUtils';
+import { toKebabCase } from '../../utils/stringUtils';
+import { getCartAttributeTestId } from '../../utils/testUtils';
 import './CartItem.css';
 
 const CartItem = ({ item }) => {
   const { updateQuantity } = useCart();
   const { name, brand, prices, attributes, gallery, quantity, cartId, selectedAttributes } = item;
   
-  const price = prices && prices.length > 0 ? prices[0] : null;
-
-  const kebabCase = (str) => str ? str.replace(/\s+/g, '-').toLowerCase() : '';
+  const price = getFirstPrice(prices);
 
   return (
     <div className="cart-item" data-testid={`cart-item-${cartId}`}>
       <div className="item-details">
         <p className="item-name">{name}</p>
         {price && (
-          <p className="item-price">{`${price.currency_symbol}${price.amount.toFixed(2)}`}</p>
+          <p className="item-price">{formatPrice(price.amount, price.currency_symbol)}</p>
         )}
         
         {attributes && attributes.map((attr) => (
-          <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${kebabCase(attr.name)}`}>
+          <div key={attr.id} className="item-attributes" data-testid={`cart-item-attribute-${toKebabCase(attr.name)}`}>
             <p className="attribute-name">{attr.name}:</p>
             <div className="attribute-options">
               {attr.items.map((option) => {
                 const isSelected = selectedAttributes[attr.id] === option.value;
-                const testId = `cart-item-attribute-${kebabCase(attr.name)}-${kebabCase(option.value)}`;
+                const testId = getCartAttributeTestId(attr.name, option.value, isSelected);
+                
                 return (
                   <button
                     key={option.value}
@@ -35,7 +37,7 @@ const CartItem = ({ item }) => {
                       ${isSelected ? 'selected' : ''}
                     `}
                     style={attr.type === 'swatch' ? { backgroundColor: option.value } : {}}
-                    data-testid={isSelected ? `${testId}-selected` : testId}
+                    data-testid={testId}
                     aria-label={`Select ${attr.name} ${option.display_value}`}
                     disabled
                   >

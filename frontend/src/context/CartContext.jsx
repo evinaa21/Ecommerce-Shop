@@ -1,102 +1,135 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { generateCartId, validateCart, getCartStatistics } from '../utils/cartUtils';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { MESSAGES, LOCAL_STORAGE_KEYS, CART_LIMITS } from '../constants';
 
 const CartContext = createContext();
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+};
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const localData = localStorage.getItem('cartItems');
-      return localData ? JSON.parse(localData) : [];
-    } catch (error) {
-      return [];
-    }
-  });
+  const [cartItems, setCartItems] = useLocalStorage(LOCAL_STORAGE_KEYS.CART_ITEMS, []);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [currentCategory, setCurrentCategory] = useState('all');
-
-  useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
 
   const showSuccessMessage = (message) => {
     setSuccessMessage(message);
-    setTimeout(() => {
-      setSuccessMessage('');
-    }, 3000); 
+    setErrorMessage(''); // Clear any error messages
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
+  const showErrorMessage = (message) => {
+    setErrorMessage(message);
+    setSuccessMessage(''); // Clear any success messages
+    setTimeout(() => setErrorMessage(''), 5000);
   };
 
   const addToCart = (product, selectedAttributes) => {
-    const productToAdd = {
-      id: product.id,
-      name: product.name,
-      brand: product.brand,
-      gallery: product.gallery,
-      prices: product.prices,
-      attributes: product.attributes,
-      in_stock: product.in_stock,
-    };
-
-    setCartItems((prevItems) => {
-      const cartId = `${productToAdd.id}-${Object.values(selectedAttributes).sort().join('-')}`;
-      const existingItem = prevItems.find((item) => item.cartId === cartId);
-
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.cartId === cartId ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      } else {
-        return [...prevItems, { ...productToAdd, selectedAttributes, quantity: 1, cartId }];
+    try {
+      // Validate stock
+      if (!product.in_stock) {
+        showErrorMessage(MESSAGES.ERROR.OUT_OF_STOCK);
+        return false;
       }
-    });
-    showSuccessMessage('Item added successfully');
+
+      const cartId = generateCartId(product.id, selectedAttributes);
+      const existingItem = cartItems.find((item) => item.cartId === cartId);
+
+      // Check quantity limits
+      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      if (newQuantity > CART_LIMITS.MAX_QUANTITY_PER_ITEM) {
+        showErrorMessage(`Maximum ${CART_LIMITS.MAX_QUANTITY_PER_ITEM} items allowed per product`);
+        return false;
+      }
+
+      // Check total items limit
+      if (!existingItem && cartItems.length >= CART_LIMITS.MAX_ITEMS_IN_CART) {
+        showErrorMessage(`Maximum ${CART_LIMITS.MAX_ITEMS_IN_CART} different items allowed in cart`);
+        return false;
+      }
+
+      const productToAdd = {
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        gallery: product.gallery,
+        prices: product.prices,
+        attributes: product.attributes,
+        in_stock: product.in_stock,
+      };
+
+      setCartItems((prevItems) => {
+        if (existingItem) {
+          return prevItems.map((item) =>
+            item.cartId === cartId ? { ...item, quantity: newQuantity } : item
+          );
+        } else {
+          return [...prevItems, { ...productToAdd, selectedAttributes, quantity: 1, cartId }];
+        }
+      });
+
+      showSuccessMessage(MESSAGES.SUCCESS.ITEM_ADDED);
+      return true;
+    } catch (error) {
+      showErrorMessage('Failed to add item to cart');
+      return false;
+    }
   };
 
   const updateQuantity = (cartId, amount) => {
     setCartItems((prevItems) => {
-      const updatedItems = prevItems
+      return prevItems
         .map((item) => {
           if (item.cartId === cartId) {
-            return { ...item, quantity: item.quantity + amount };
+            const newQuantity = item.quantity + amount;
+            if (newQuantity > CART_LIMITS.MAX_QUANTITY_PER_ITEM) {
+              showErrorMessage(`Maximum ${CART_LIMITS.MAX_QUANTITY_PER_ITEM} items allowed`);
+              return item;
+            }
+            return { ...item, quantity: newQuantity };
           }
           return item;
         })
-        .filter((item) => item.quantity > 0);       return updatedItems;
+        .filter((item) => item.quantity > 0);
     });
   };
 
-  const updateAttributes = (cartId, newAttributes) => {
-    setCartItems((prevItems) => {
-      return prevItems.map((item) => {
-        if (item.cartId === cartId) {
-          return { 
-            ...item, 
-            selectedAttributes: { ...item.selectedAttributes, ...newAttributes } 
-          };
-        }
-        return item;
-      });
-    });
+  const removeItem = (cartId) => {
+    setCartItems((prevItems) => prevItems.filter(item => item.cartId !== cartId));
+    showSuccessMessage(MESSAGES.SUCCESS.ITEM_REMOVED);
   };
 
   const clearCart = () => {
     setCartItems([]);
   };
 
+  const getCartValidation = () => validateCart(cartItems);
+  const getCartStats = () => getCartStatistics(cartItems);
+
   const value = {
     cartItems,
     isCartOpen,
     setIsCartOpen,
     successMessage,
+    errorMessage,
     currentCategory,
     setCurrentCategory,
     addToCart,
     updateQuantity,
-    updateAttributes, 
+    removeItem,
     clearCart,
-    showSuccessMessage, // <-- Add this line!
+    showSuccessMessage,
+    showErrorMessage,
+    getCartValidation,
+    getCartStats,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

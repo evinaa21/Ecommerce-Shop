@@ -1,39 +1,23 @@
 import React from 'react';
+import { toKebabCase, getSizeInitials } from '../../utils/stringUtils';
+import { getAttributeTestId } from '../../utils/testUtils';
 import './ProductAttributes.css';
 
 const ProductAttributes = ({ attributes, selectedAttributes, onAttributeSelect }) => {
-  const kebabCase = (str) => str ? str.replace(/\s+/g, '-').toLowerCase() : '';
-
-  const getSizeInitials = (value) => {
-    if (!value) return '';
-    
-    if (!isNaN(value) || /^\d+/.test(value)) {
-      return value; 
-    }
-    
-    const words = value.split(' ');
-    if (words.length > 1) {
-      return words.map(word => {
-        if (word.toLowerCase() === 'extra') return 'X';
-        return word[0];
-      }).join('').toUpperCase();
-    }
-    return value[0].toUpperCase();
-  };
-
   return (
     <div className="product-attributes">
       {attributes.map((attr) => (
         <div 
           key={attr.id} 
           className="product-attribute"
-          data-testid={`product-attribute-${kebabCase(attr.name)}`}
+          data-testid={getAttributeTestId(attr.name)}
         >
           <h3 className="attribute-name">{attr.name}:</h3>
           <div className="attribute-options">
             {attr.items.map((option) => {
               const isSelected = selectedAttributes[attr.id] === option.value;
-              const testId = `product-attribute-${kebabCase(attr.name)}-${option.value}`;
+              const testId = getAttributeTestId(attr.name, option.value);
+              
               return (
                 <button
                   key={option.value}

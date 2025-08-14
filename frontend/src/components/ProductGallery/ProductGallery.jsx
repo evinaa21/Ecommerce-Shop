@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useImageGallery } from '../../hooks/useImageGallery';
 import './ProductGallery.css';
 
 const ProductGallery = ({ gallery, productName }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === gallery.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? gallery.length - 1 : prev - 1
-    );
-  };
+  const { 
+    currentIndex, 
+    currentImage, 
+    nextImage, 
+    prevImage, 
+    goToImage, 
+    hasMultipleImages 
+  } = useImageGallery(gallery);
 
   return (
     <div className="product-gallery" data-testid="product-gallery">
@@ -24,19 +20,19 @@ const ProductGallery = ({ gallery, productName }) => {
             key={index}
             src={image}
             alt={`${productName} ${index + 1}`}
-            className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
-            onClick={() => setCurrentImageIndex(index)}
+            className={`thumbnail ${index === currentIndex ? 'active' : ''}`}
+            onClick={() => goToImage(index)}
           />
         ))}
       </div>
       <div className="gallery-main">
         <div className="main-image-container">
           <img
-            src={gallery[currentImageIndex]}
+            src={currentImage}
             alt={productName}
             className="main-image"
           />
-          {gallery.length > 1 && (
+          {hasMultipleImages && (
             <>
               <button className="gallery-arrow prev" onClick={prevImage}>
                 &#8249;

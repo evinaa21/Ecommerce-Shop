@@ -1,5 +1,7 @@
 import React from 'react';
 import ProductAttributes from '../ProductAttributes/ProductAttributes';
+import { formatPrice, getFirstPrice } from '../../utils/priceUtils';
+import { sanitizeHtml } from '../../utils/htmlUtils';
 import './ProductInfo.css';
 
 const ProductInfo = ({ 
@@ -9,16 +11,7 @@ const ProductInfo = ({
   onAddToCart, 
   isAddToCartDisabled 
 }) => {
-  const parseDescription = (html) => {
-    return html
-      .replace(/<p>/g, '')
-      .replace(/<\/p>/g, '\n')
-      .replace(/<br\s*\/?>/g, '\n')
-      .replace(/<[^>]*>/g, '')
-      .trim();
-  };
-
-  const price = product.prices[0];
+  const price = getFirstPrice(product.prices);
 
   return (
     <div className="product-info">
@@ -33,7 +26,7 @@ const ProductInfo = ({
       <div className="product-price">
         <span className="price-label">Price:</span>
         <span className="price-amount">
-          {price.currency_symbol}{price.amount.toFixed(2)}
+          {formatPrice(price.amount, price.currency_symbol)}
         </span>
       </div>
 
@@ -47,11 +40,12 @@ const ProductInfo = ({
       </button>
 
       <div className="product-description" data-testid="product-description">
-        <div className="description-content">
-          {parseDescription(product.description || '').split('\n').map((paragraph, index) => (
-            paragraph.trim() && <p key={index}>{paragraph.trim()}</p>
-          ))}
-        </div>
+        <div 
+          className="description-content"
+          dangerouslySetInnerHTML={{ 
+            __html: sanitizeHtml(product.description || '') 
+          }}
+        />
       </div>
     </div>
   );

@@ -1,0 +1,44 @@
+export const API_ENDPOINTS = {
+  GRAPHQL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+};
+
+export const LOCAL_STORAGE_KEYS = {
+  CART_ITEMS: 'cartItems',
+  USER_PREFERENCES: 'userPreferences',
+  LAST_VISITED_CATEGORY: 'lastVisitedCategory',
+};
+
+export const MESSAGES = {
+  SUCCESS: {
+    ITEM_ADDED: 'Item added successfully',
+    ORDER_PLACED: 'Order placed successfully',
+    ITEM_REMOVED: 'Item removed from cart',
+  },
+  ERROR: {
+    NETWORK: 'Network connection failed',
+    SERVER: 'Server error occurred',
+    NOT_FOUND: 'Item not found',
+    OUT_OF_STOCK: 'Item is out of stock',
+  },
+  LOADING: {
+    PRODUCTS: 'Loading products...',
+    CATEGORIES: 'Loading categories...',
+    PLACING_ORDER: 'Placing order...',
+  }
+};
+
+export const BREAKPOINTS = {
+  MOBILE: '768px',
+  TABLET: '1024px',
+  DESKTOP: '1200px',
+};
+
+export const CART_LIMITS = {
+  MAX_QUANTITY_PER_ITEM: 10,
+  MAX_ITEMS_IN_CART: 50,
+};
+
+export const CURRENCY = {
+  DEFAULT_SYMBOL: '$',
+  DEFAULT_LOCALE: 'en-US',
+};

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCT_BY_ID } from '../../graphql/queries';
 import { useCart } from '../../context/CartContext';
+import { useProductAttributes } from '../../hooks/useProductAttributes';
 import ProductGallery from '../../components/ProductGallery/ProductGallery';
 import ProductInfo from '../../components/ProductInfo/ProductInfo';
 import './ProductPage.css';
@@ -10,7 +11,6 @@ import './ProductPage.css';
 const ProductPage = () => {
   const { productId } = useParams();
   const { addToCart, setIsCartOpen, setCurrentCategory } = useCart();
-  const [selectedAttributes, setSelectedAttributes] = useState({});
   
   const { loading, error, data } = useQuery(GET_PRODUCT_BY_ID, {
     variables: { id: productId },
@@ -18,6 +18,12 @@ const ProductPage = () => {
   });
 
   const product = data?.product;
+  
+  const {
+    selectedAttributes,
+    selectAttribute,
+    isComplete
+  } = useProductAttributes(product?.attributes);
 
   useEffect(() => {
     if (product?.category) {
@@ -25,36 +31,21 @@ const ProductPage = () => {
     }
   }, [product, setCurrentCategory]);
 
-  useEffect(() => {
-    if (product?.attributes) {
-      const initialAttributes = {};
-      product.attributes.forEach((attr) => {
-        initialAttributes[attr.id] = '';
-      });
-      setSelectedAttributes(initialAttributes);
-    }
-  }, [product]);
-
   if (loading) return <div className="loading">Loading product...</div>;
   if (error) return <div className="error">Error loading product: {error.message}</div>;
   if (!product) return <div className="error">Product not found</div>;
 
-  const handleAttributeSelect = (attributeId, value) => {
-    setSelectedAttributes(prev => ({
-      ...prev,
-      [attributeId]: value
-    }));
-  };
-
   const isAddToCartDisabled = () => {
-    if (!product.in_stock) return true;
-    return product.attributes.some(attr => !selectedAttributes[attr.id]);
+    return !product.in_stock || !isComplete;
   };
 
   const handleAddToCart = () => {
     if (isAddToCartDisabled()) return;
-    addToCart(product, selectedAttributes);
-    setIsCartOpen(true);
+    
+    const success = addToCart(product, selectedAttributes);
+    if (success) {
+      setIsCartOpen(true);
+    }
   };
 
   return (
@@ -67,7 +58,7 @@ const ProductPage = () => {
         <ProductInfo
           product={product}
           selectedAttributes={selectedAttributes}
-          onAttributeSelect={handleAttributeSelect}
+          onAttributeSelect={selectAttribute}
           onAddToCart={handleAddToCart}
           isAddToCartDisabled={isAddToCartDisabled}
         />

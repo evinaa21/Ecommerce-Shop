@@ -6,6 +6,8 @@ import CartItem from '../CartItem/CartItem.jsx';
 import CartHeader from '../CartHeader/CartHeader';
 import CartSummary from '../CartSummary/CartSummary';
 import SuccessMessage from '../SuccessMessage/SuccessMessage';
+import { calculateTotalPrice, calculateTotalItems } from '../../utils/priceUtils';
+import { formatAttributesForOrder } from '../../utils/cartUtils';
 import './CartOverlay.css';
 
 const CartOverlay = () => {
@@ -32,24 +34,15 @@ const CartOverlay = () => {
 
   if (!isVisible) return null;
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const price = item.prices[0].amount;
-    return sum + price * item.quantity;
-  }, 0);
+  const totalItems = calculateTotalItems(cartItems);
+  const totalPrice = calculateTotalPrice(cartItems);
 
   const handlePlaceOrder = async () => {
     const products = cartItems.map(item => ({
       productId: item.id,
       quantity: item.quantity,
       price: item.prices[0].amount,
-      attributes: Object.entries(item.selectedAttributes).map(([attributeId, value]) => {
-        const attribute = item.attributes.find(attr => attr.id === attributeId);
-        return {
-          name: attribute ? attribute.name : attributeId,
-          value: value
-        };
-      })
+      attributes: formatAttributesForOrder(item.selectedAttributes, item.attributes)
     }));
 
     try {
