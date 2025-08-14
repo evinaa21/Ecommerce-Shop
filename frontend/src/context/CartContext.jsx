@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { generateCartId, validateCart, getCartStatistics } from '../utils/cartUtils';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { MESSAGES, LOCAL_STORAGE_KEYS, CART_LIMITS } from '../constants';
@@ -20,53 +20,57 @@ export const CartProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [currentCategory, setCurrentCategory] = useState('all');
 
-  const showSuccessMessage = (message) => {
+  // Memoize expensive calculations
+  const cartStats = useMemo(() => getCartStatistics(cartItems), [cartItems]);
+  const cartValidation = useMemo(() => validateCart(cartItems), [cartItems]);
+
+  // Memoize message handlers
+  const showSuccessMessage = useCallback((message) => {
     setSuccessMessage(message);
-    setErrorMessage(''); // Clear any error messages
+    setErrorMessage('');
     setTimeout(() => setSuccessMessage(''), 3000);
-  };
+  }, []);
 
-  const showErrorMessage = (message) => {
+  const showErrorMessage = useCallback((message) => {
     setErrorMessage(message);
-    setSuccessMessage(''); // Clear any success messages
+    setSuccessMessage('');
     setTimeout(() => setErrorMessage(''), 5000);
-  };
+  }, []);
 
-  const addToCart = (product, selectedAttributes) => {
+  // Memoize cart operations
+  const addToCart = useCallback((product, selectedAttributes) => {
     try {
-      // Validate stock
       if (!product.in_stock) {
         showErrorMessage(MESSAGES.ERROR.OUT_OF_STOCK);
         return false;
       }
 
       const cartId = generateCartId(product.id, selectedAttributes);
-      const existingItem = cartItems.find((item) => item.cartId === cartId);
-
-      // Check quantity limits
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
-      if (newQuantity > CART_LIMITS.MAX_QUANTITY_PER_ITEM) {
-        showErrorMessage(`Maximum ${CART_LIMITS.MAX_QUANTITY_PER_ITEM} items allowed per product`);
-        return false;
-      }
-
-      // Check total items limit
-      if (!existingItem && cartItems.length >= CART_LIMITS.MAX_ITEMS_IN_CART) {
-        showErrorMessage(`Maximum ${CART_LIMITS.MAX_ITEMS_IN_CART} different items allowed in cart`);
-        return false;
-      }
-
-      const productToAdd = {
-        id: product.id,
-        name: product.name,
-        brand: product.brand,
-        gallery: product.gallery,
-        prices: product.prices,
-        attributes: product.attributes,
-        in_stock: product.in_stock,
-      };
-
+      
       setCartItems((prevItems) => {
+        const existingItem = prevItems.find((item) => item.cartId === cartId);
+        const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+        
+        if (newQuantity > CART_LIMITS.MAX_QUANTITY_PER_ITEM) {
+          showErrorMessage(`Maximum ${CART_LIMITS.MAX_QUANTITY_PER_ITEM} items allowed per product`);
+          return prevItems;
+        }
+
+        if (!existingItem && prevItems.length >= CART_LIMITS.MAX_ITEMS_IN_CART) {
+          showErrorMessage(`Maximum ${CART_LIMITS.MAX_ITEMS_IN_CART} different items allowed in cart`);
+          return prevItems;
+        }
+
+        const productToAdd = {
+          id: product.id,
+          name: product.name,
+          brand: product.brand,
+          gallery: product.gallery,
+          prices: product.prices,
+          attributes: product.attributes,
+          in_stock: product.in_stock,
+        };
+
         if (existingItem) {
           return prevItems.map((item) =>
             item.cartId === cartId ? { ...item, quantity: newQuantity } : item
@@ -82,9 +86,9 @@ export const CartProvider = ({ children }) => {
       showErrorMessage('Failed to add item to cart');
       return false;
     }
-  };
+  }, [showSuccessMessage, showErrorMessage]);
 
-  const updateQuantity = (cartId, amount) => {
+  const updateQuantity = useCallback((cartId, amount) => {
     setCartItems((prevItems) => {
       return prevItems
         .map((item) => {
@@ -100,21 +104,19 @@ export const CartProvider = ({ children }) => {
         })
         .filter((item) => item.quantity > 0);
     });
-  };
+  }, [showErrorMessage]);
 
-  const removeItem = (cartId) => {
+  const removeItem = useCallback((cartId) => {
     setCartItems((prevItems) => prevItems.filter(item => item.cartId !== cartId));
     showSuccessMessage(MESSAGES.SUCCESS.ITEM_REMOVED);
-  };
+  }, [showSuccessMessage]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, [setCartItems]);
 
-  const getCartValidation = () => validateCart(cartItems);
-  const getCartStats = () => getCartStatistics(cartItems);
-
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     cartItems,
     isCartOpen,
     setIsCartOpen,
@@ -128,9 +130,23 @@ export const CartProvider = ({ children }) => {
     clearCart,
     showSuccessMessage,
     showErrorMessage,
-    getCartValidation,
-    getCartStats,
-  };
+    cartStats,
+    cartValidation,
+  }), [
+    cartItems,
+    isCartOpen,
+    successMessage,
+    errorMessage,
+    currentCategory,
+    addToCart,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    showSuccessMessage,
+    showErrorMessage,
+    cartStats,
+    cartValidation,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

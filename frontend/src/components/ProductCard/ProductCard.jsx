@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { formatPrice, getFirstPrice } from '../../utils/priceUtils';
@@ -6,17 +6,19 @@ import { createDefaultAttributes } from '../../utils/cartUtils';
 import { getProductTestId } from '../../utils/testUtils';
 import './ProductCard.css';
 
-const ProductCard = ({ product }) => {
-  const { name, in_stock, gallery, prices, id, attributes } = product;
+// Memoize the component to prevent unnecessary re-renders
+const ProductCard = memo(({ product }) => {
   const { addToCart } = useCart();
+  const { name, in_stock, gallery, prices, id, attributes } = product;
 
   const price = getFirstPrice(prices);
   
-  const handleQuickShop = (e) => {
+  // Memoize event handlers
+  const handleQuickShop = useCallback((e) => {
     e.preventDefault(); 
     const defaultAttributes = createDefaultAttributes(attributes);
     addToCart(product, defaultAttributes);
-  };
+  }, [product, attributes, addToCart]);
 
   return (
     <Link to={`/product/${id}`} className="product-card-link">
@@ -25,7 +27,14 @@ const ProductCard = ({ product }) => {
         data-testid={getProductTestId(name)}
       >
         <div className="image-container">
-          <img src={gallery[0]} alt={name} className="product-image" />
+          <img 
+            src={gallery[0]} 
+            alt={name} 
+            className="product-image"
+            loading="lazy" // Add lazy loading
+            width="350"
+            height="350"
+          />
           {!in_stock && <div className="out-of-stock-overlay">OUT OF STOCK</div>}
           {in_stock && (
             <button onClick={handleQuickShop} className="quick-shop-button" aria-label="Add to cart">
@@ -44,6 +53,7 @@ const ProductCard = ({ product }) => {
       </div>
     </Link>
   );
-};
+});
 
+ProductCard.displayName = 'ProductCard';
 export default ProductCard;

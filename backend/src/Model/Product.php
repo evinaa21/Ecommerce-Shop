@@ -10,13 +10,10 @@ use App\Model\Product\GenericProduct;
 use App\Model\Abstract\AbstractProduct;
 use PDO;
 
-/**
- * This class now acts as a Repository and a Factory.
- * It fetches product data and creates the correct polymorphic product object.
- */
 class Product
 {
     private PDO $db;
+    private static array $cache = [];
 
     // Explicit category → class map to avoid relying on naming conventions.
     private const CATEGORY_CLASS_MAP = [
@@ -50,6 +47,12 @@ class Product
 
     public function findById(string $id): ?AbstractProduct
     {
+        // Simple in-memory cache
+        $cacheKey = "product_$id";
+        if (isset(self::$cache[$cacheKey])) {
+            return self::$cache[$cacheKey];
+        }
+
         $stmt = $this->db->prepare("
             SELECT p.*, c.name as category_name
             FROM products p
@@ -59,15 +62,37 @@ class Product
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch();
 
-        return $data ? $this->factory($data) : null;
+        $product = $data ? $this->factory($data) : null;
+        
+        if ($product) {
+            self::$cache[$cacheKey] = $product;
+        }
+
+        return $product;
     }
 
     public function findByCategory(string $categoryName): array
     {
+        $cacheKey = "category_$categoryName";
+        if (isset(self::$cache[$cacheKey])) {
+            return self::$cache[$cacheKey];
+        }
+
+        // Optimized single query with JOINs
         $sql = "
-            SELECT p.*, c.name as category_name
+            SELECT 
+                p.id, p.name, p.in_stock, p.brand,
+                c.name as category_name,
+                pg.url as gallery_url,
+                pp.amount, pp.currency_label, pp.currency_symbol,
+                attrs.id as attr_id, attrs.name as attr_name, attrs.type as attr_type,
+                ai.display_value, ai.value as attr_value
             FROM products p
             JOIN categories c ON p.category_id = c.id
+            LEFT JOIN product_gallery pg ON p.id = pg.product_id
+            LEFT JOIN product_prices pp ON p.id = pp.product_id
+            LEFT JOIN attribute_sets attrs ON p.id = attrs.product_id
+            LEFT JOIN attribute_items ai ON attrs.id = ai.attribute_set_id
         ";
 
         if ($categoryName !== 'all') {
@@ -79,47 +104,100 @@ class Product
         }
 
         $products = [];
+        $productMap = [];
+
         while ($row = $stmt->fetch()) {
-            $products[] = [
-                'id' => $row['id'],
-                'name' => $row['name'],
-                'in_stock' => $row['in_stock'],
-                'brand' => $row['brand'],
-                'gallery' => $this->getFirstGalleryImage($row['id']),
-                'prices' => $this->getFirstPrice($row['id']),
-                'attributes' => $this->getBasicAttributes($row['id']), // Add this
-            ];
+            $productId = $row['id'];
+            
+            if (!isset($productMap[$productId])) {
+                $productMap[$productId] = [
+                    'id' => $productId,
+                    'name' => $row['name'],
+                    'in_stock' => $row['in_stock'],
+                    'brand' => $row['brand'],
+                    'gallery' => [],
+                    'prices' => [],
+                    'attributes' => []
+                ];
+            }
+
+            // Add gallery image if exists
+            if ($row['gallery_url'] && !in_array($row['gallery_url'], $productMap[$productId]['gallery'])) {
+                $productMap[$productId]['gallery'][] = $row['gallery_url'];
+            }
+
+            // Add price if exists
+            if ($row['amount'] && !$this->priceExists($productMap[$productId]['prices'], $row)) {
+                $productMap[$productId]['prices'][] = [
+                    'amount' => $row['amount'],
+                    'currency_label' => $row['currency_label'],
+                    'currency_symbol' => $row['currency_symbol']
+                ];
+            }
+
+            // Add attributes if exists
+            if ($row['attr_id']) {
+                $this->addAttributeToProduct($productMap[$productId], $row);
+            }
         }
+
+        $products = array_values($productMap);
+        self::$cache[$cacheKey] = $products;
+
         return $products;
     }
 
-    private function getFirstGalleryImage(string $productId): array
+    private function priceExists(array $prices, array $row): bool
     {
-        $stmt = $this->db->prepare("SELECT url FROM product_gallery WHERE product_id = :id ORDER BY id LIMIT 1");
-        $stmt->execute(['id' => $productId]);
-        $url = $stmt->fetchColumn();
-        return $url ? [$url] : [];
-    }
-
-    private function getFirstPrice(string $productId): array
-    {
-        $stmt = $this->db->prepare("SELECT amount, currency_label, currency_symbol FROM product_prices WHERE product_id = :id LIMIT 1");
-        $stmt->execute(['id' => $productId]);
-        $price = $stmt->fetch();
-        return $price ? [$price] : [];
-    }
-
-    private function getBasicAttributes(string $productId): array
-    {
-        $stmt = $this->db->prepare("SELECT id, name, type FROM attribute_sets WHERE product_id = :id");
-        $stmt->execute(['id' => $productId]);
-        $attributes = $stmt->fetchAll();
-
-        $itemStmt = $this->db->prepare("SELECT display_value, value FROM attribute_items WHERE attribute_set_id = :attribute_set_id");
-        foreach ($attributes as $key => $attribute) {
-            $itemStmt->execute(['attribute_set_id' => $attribute['id']]);
-            $attributes[$key]['items'] = $itemStmt->fetchAll();
+        foreach ($prices as $price) {
+            if ($price['amount'] == $row['amount'] && 
+                $price['currency_label'] == $row['currency_label']) {
+                return true;
+            }
         }
-        return $attributes;
+        return false;
+    }
+
+    private function addAttributeToProduct(array &$product, array $row): void
+    {
+        $attrId = $row['attr_id'];
+        $attrIndex = null;
+
+        // Find existing attribute
+        foreach ($product['attributes'] as $index => $attr) {
+            if ($attr['id'] == $attrId) {
+                $attrIndex = $index;
+                break;
+            }
+        }
+
+        // Create new attribute if not exists
+        if ($attrIndex === null) {
+            $product['attributes'][] = [
+                'id' => $attrId,
+                'name' => $row['attr_name'],
+                'type' => $row['attr_type'],
+                'items' => []
+            ];
+            $attrIndex = count($product['attributes']) - 1;
+        }
+
+        // Add item if not exists
+        if ($row['attr_value']) {
+            $itemExists = false;
+            foreach ($product['attributes'][$attrIndex]['items'] as $item) {
+                if ($item['value'] == $row['attr_value']) {
+                    $itemExists = true;
+                    break;
+                }
+            }
+
+            if (!$itemExists) {
+                $product['attributes'][$attrIndex]['items'][] = [
+                    'display_value' => $row['display_value'],
+                    'value' => $row['attr_value']
+                ];
+            }
+        }
     }
 }
