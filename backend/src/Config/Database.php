@@ -9,6 +9,8 @@ use Dotenv\Dotenv;
 class Database
 {
     private static ?PDO $connection = null;
+    private static int $retryAttempts = 3;
+    private static int $retryDelay = 1; // seconds
 
     public static function getConnection(): PDO
     {
@@ -108,7 +110,81 @@ class Database
             error_log("Using existing database connection");
         }
 
+        // Test connection and reconnect if needed
+        if (!self::isConnectionAlive()) {
+            self::createConnection();
+        }
+
         error_log("=== Database connection established ===");
         return self::$connection;
+    }
+
+    private static function createConnection(): void
+    {
+        $host = $_ENV['DB_HOST'] ?? 'localhost';
+        $dbname = $_ENV['DB_NAME'] ?? 'ecommerce';
+        $username = $_ENV['DB_USER'] ?? 'root';
+        $password = $_ENV['DB_PASS'] ?? '';
+        $port = $_ENV['DB_PORT'] ?? '3306';
+
+        $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
+
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_PERSISTENT => true,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
+            PDO::ATTR_TIMEOUT => 30,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ];
+
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= self::$retryAttempts; $attempt++) {
+            try {
+                self::$connection = new PDO($dsn, $username, $password, $options);
+                
+                // Test the connection
+                self::$connection->query("SELECT 1");
+                
+                error_log("Database connection established successfully on attempt {$attempt}");
+                return;
+                
+            } catch (PDOException $e) {
+                $lastException = $e;
+                error_log("Database connection attempt {$attempt} failed: " . $e->getMessage());
+                
+                if ($attempt < self::$retryAttempts) {
+                    sleep(self::$retryDelay);
+                }
+            }
+        }
+
+        throw new PDOException(
+            "Failed to connect to database after " . self::$retryAttempts . " attempts. Last error: " . 
+            ($lastException ? $lastException->getMessage() : 'Unknown error')
+        );
+    }
+
+    private static function isConnectionAlive(): bool
+    {
+        if (self::$connection === null) {
+            return false;
+        }
+
+        try {
+            self::$connection->query("SELECT 1");
+            return true;
+        } catch (PDOException $e) {
+            error_log("Database connection test failed: " . $e->getMessage());
+            self::$connection = null;
+            return false;
+        }
+    }
+
+    public static function closeConnection(): void
+    {
+        self::$connection = null;
     }
 }
