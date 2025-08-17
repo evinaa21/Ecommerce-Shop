@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '../../graphql/queries';
 import { useCart } from '../../context/CartContext';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import './Header.css';
 import logo from '../../assets/icon.png';
 
@@ -15,10 +16,6 @@ const Header = () => {
     notifyOnNetworkStatusChange: true,
     onError: (error) => {
       console.error('Categories query error:', error);
-      // Auto-retry after 2 seconds
-      setTimeout(() => {
-        refetch();
-      }, 2000);
     }
   });
   const { cartItems, isCartOpen, setIsCartOpen, currentCategory } = useCart();
@@ -63,21 +60,16 @@ const Header = () => {
     return false;
   };
 
-  // Show loading state with basic navigation
+  // Show loading state only for initial loads
   if (loading && !data) {
     return (
       <header className="header">
-        <nav className="header-nav">
-          {fallbackCategories.map((category) => (
-            <NavLink
-              key={category.name}
-              to={`/${category.name}`}
-              className="nav-link"
-            >
-              {category.name.toUpperCase()}
-            </NavLink>
-          ))}
-        </nav>
+        <div className="header-loading">
+          <LoadingScreen 
+            message="Loading navigation..." 
+            subMessage="This may take a moment on first load"
+          />
+        </div>
         <div className="header-logo">
           <img src={logo} alt="Shop Logo" className="logo-image" />
         </div>
@@ -100,9 +92,9 @@ const Header = () => {
     return (
       <header className="header">
         <div className="error-state">
-          <span>Error loading categories</span>
+          <span>Connection failed</span>
           <button onClick={() => refetch()} className="retry-btn">
-            Retry
+            Retry Connection
           </button>
         </div>
         <div className="header-logo">

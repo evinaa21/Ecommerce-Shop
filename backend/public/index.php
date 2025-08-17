@@ -35,7 +35,7 @@ use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Error\FormattedError;
 
-// Load environment variables
+// Load environment variables with retry logic
 $dotenvPath = realpath(__DIR__ . '/../');
 if (file_exists($dotenvPath . '/.env')) {
     try {
@@ -45,10 +45,39 @@ if (file_exists($dotenvPath . '/.env')) {
     }
 }
 
-// Health check endpoint
+// Function to test database connection with retries
+function testDatabaseConnection($maxRetries = 3) {
+    $lastError = null;
+    
+    for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+        try {
+            error_log("Database connection attempt {$attempt}/{$maxRetries}");
+            $db = \App\Config\Database::getConnection();
+            $stmt = $db->query("SELECT 1");
+            if ($stmt) {
+                error_log("Database connection successful on attempt {$attempt}");
+                return $db;
+            }
+        } catch (\Throwable $e) {
+            $lastError = $e;
+            error_log("Database connection attempt {$attempt} failed: " . $e->getMessage());
+            
+            if ($attempt < $maxRetries) {
+                // Wait before retry (exponential backoff)
+                $waitTime = min(2 ** $attempt, 5); // Max 5 seconds
+                error_log("Waiting {$waitTime} seconds before retry...");
+                sleep($waitTime);
+            }
+        }
+    }
+    
+    throw $lastError ?: new Exception("Database connection failed after {$maxRetries} attempts");
+}
+
+// Health check endpoint with better error handling
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
-        $db = \App\Config\Database::getConnection();
+        $db = testDatabaseConnection();
         $stmt = $db->query("SELECT COUNT(*) as c FROM categories");
         $count = $stmt ? $stmt->fetch()['c'] ?? 0 : 0;
 
@@ -69,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'message' => 'Database connection failed',
             'error' => $e->getMessage(),
             'timestamp' => date('Y-m-d H:i:s'),
+            'retry_after' => 5, // Suggest retry after 5 seconds
         ], JSON_PRETTY_PRINT);
     }
     exit;
@@ -108,14 +138,19 @@ if (!$query) {
 }
 
 try {
-    // Test database connection before processing query
-    $db = \App\Config\Database::getConnection();
-    $db->query("SELECT 1");
+    // Test database connection with retries before processing query
+    $db = testDatabaseConnection();
     
-    $schema = new Schema([
-        'query' => new QueryType(),
-        'mutation' => new MutationType(),
-    ]);
+    // Initialize GraphQL schema with error handling
+    try {
+        $schema = new Schema([
+            'query' => new QueryType(),
+            'mutation' => new MutationType(),
+        ]);
+    } catch (\Throwable $e) {
+        error_log('GraphQL Schema initialization failed: ' . $e->getMessage());
+        throw new Exception('Failed to initialize GraphQL schema: ' . $e->getMessage());
+    }
     
     $result = GraphQL::executeQuery($schema, $query, null, null, $vars);
     $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
@@ -140,6 +175,7 @@ try {
                 'extensions' => [
                     'code' => 'DATABASE_ERROR',
                     'timestamp' => date('Y-m-d H:i:s'),
+                    'retry_after' => 5,
                     'trace' => $e->getTraceAsString()
                 ]
             ]
@@ -171,6 +207,7 @@ try {
                 'extensions' => [
                     'code' => 'INTERNAL_ERROR',
                     'timestamp' => date('Y-m-d H:i:s'),
+                    'retry_after' => 5,
                     'trace' => $e->getTraceAsString()
                 ]
             ]

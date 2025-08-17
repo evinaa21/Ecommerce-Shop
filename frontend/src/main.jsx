@@ -10,7 +10,7 @@ import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import App from './App.jsx';
 import './index.css';
 
-// Error handling link
+// Enhanced error handling link
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
@@ -19,40 +19,69 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
   }
 
   if (networkError) {
-    console.error(`Network error: ${networkError}`);
+    console.error(`Network error:`, networkError);
+    console.error(`Status: ${networkError.statusCode}`);
+    console.error(`Message: ${networkError.message}`);
     
-    // Handle specific network errors
+    // Log additional details for 500 errors
     if (networkError.statusCode === 500) {
-      console.warn('Server error detected, may retry...');
+      console.warn('Server error detected - this may be a cold start or database connection issue');
     }
   }
 });
 
-// Retry link for failed requests
+// Enhanced retry link with more aggressive retry for initial loads
 const retryLink = new RetryLink({
   delay: {
-    initial: 1000, // Start with 1 second delay
-    max: 5000, // Max 5 seconds
+    initial: 1000,
+    max: 8000, // Increased max delay
     jitter: true
   },
   attempts: {
-    max: 3,
-    retryIf: (error, _operation) => {
-      // Retry on network errors and 5xx server errors
-      return !!error && (
-        error.networkError?.statusCode >= 500 ||
-        error.message?.includes('Failed to fetch') ||
-        error.message?.includes('Internal server error')
-      );
+    max: 5, // Increased retry attempts
+    retryIf: (error, operation) => {
+      const is500Error = error?.networkError?.statusCode === 500;
+      const isNetworkError = !!error?.networkError;
+      const isConnectionError = error?.message?.includes('Failed to fetch') ||
+                               error?.message?.includes('Network request failed');
+      
+      // Retry on server errors, network issues, or connection problems
+      const shouldRetry = is500Error || isConnectionError || 
+                         (isNetworkError && !error?.networkError?.statusCode);
+      
+      if (shouldRetry) {
+        console.log(`Retrying ${operation.operationName} (attempt ${operation.getContext().retryCount || 1})`);
+      }
+      
+      return shouldRetry;
     }
   }
 });
 
-// HTTP link with timeout
+// HTTP link with increased timeout and better error handling
 const httpLink = createHttpLink({
   uri: 'https://ecommerce-shop-production-3d0b.up.railway.app/',
   fetchOptions: {
-    timeout: 10000, // 10 second timeout
+    timeout: 15000, // Increased timeout for cold starts
+  },
+  // Add custom fetch to handle network errors better
+  fetch: async (uri, options) => {
+    try {
+      const response = await fetch(uri, options);
+      
+      // Log response details for debugging
+      if (!response.ok) {
+        console.error(`HTTP ${response.status}: ${response.statusText}`);
+        if (response.status === 500) {
+          console.error('Server error - possible cold start or database issue');
+        }
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw error;
+    }
   }
 });
 
@@ -63,7 +92,7 @@ const client = new ApolloClient({
       Query: {
         fields: {
           categories: {
-            merge: false, // Don't merge, replace array
+            merge: false,
           },
         },
       },
@@ -94,7 +123,7 @@ const client = new ApolloClient({
     },
     query: {
       errorPolicy: 'all',
-      fetchPolicy: 'cache-first',
+      fetchPolicy: 'network-only', // Changed for initial load reliability
     },
   },
 });
